@@ -18,13 +18,13 @@ public class CommonUIManager : MonoBehaviour
         }
     }
     public Canvas m_CommonUICanvas;
-    public Text m_myMoneyText;
+    public NumberDisplay m_myMoneyDisplay;
 
     static CommonUIManager m_instance;
     bool m_isAnimatingMonetText;
-    int m_startMoneyToAnimate;
-    int m_targetMoneyToAnimate;
-    int m_currentMoneyToAnimate;
+    long m_startMoneyToAnimate;
+    long m_targetMoneyToAnimate;
+    long m_currentMoneyToAnimate;
     const float m_timeIncreasingMoney = 1.25f;
 
 
@@ -52,10 +52,12 @@ public class CommonUIManager : MonoBehaviour
             {
                 ApplyMyMoneyText();
                 m_isAnimatingMonetText = false;
+                Debug.Log("3 : " + PlayerDataManager.Instance.m_playerData.m_myCurrentMoney);
             }
             else
             {
-                m_myMoneyText.text = string.Format("{0:#,###}", m_currentMoneyToAnimate);
+                m_myMoneyDisplay.SetNumber(m_currentMoneyToAnimate);
+                Debug.Log("4 : " + PlayerDataManager.Instance.m_playerData.m_myCurrentMoney);
             }
             
         }
@@ -64,14 +66,15 @@ public class CommonUIManager : MonoBehaviour
     #region Public Method
     public void ApplyMyMoneyText()
     {
-        m_myMoneyText.text = string.Format("{0:#,###}", PlayerDataManager.Instance.m_playerData.m_myCurrentMoney);
+        m_myMoneyDisplay.SetNumber(PlayerDataManager.Instance.m_playerData.m_myCurrentMoney);
     }
-    public void AnimateIncreasingMyMoneyText(int startMoney, int targetMoney)
+    public void AnimateIncreasingMyMoneyText(long startMoney, long targetMoney)
     {
         m_startMoneyToAnimate = startMoney;
         m_targetMoneyToAnimate = targetMoney;
         m_currentMoneyToAnimate = m_startMoneyToAnimate;
         m_isAnimatingMonetText = true;
+        Debug.Log("AnimateIncreasingMyMoneyText : " + PlayerDataManager.Instance.m_playerData.m_myCurrentMoney);
     }
     #endregion
 

@@ -8,7 +8,7 @@ using System;
 [Serializable]
 public class PlayerData
 {
-    public int m_myCurrentMoney;
+    public long m_myCurrentMoney;
     public string m_stringToCollectSpecialBonus;
 
     [NonSerialized]
@@ -32,9 +32,9 @@ public class PlayerDataManager : MonoBehaviour
     }
 
     public PlayerData m_playerData { get; private set; }
-
-    const int m_startMoney = 1000000;
-    const int m_secondsForNextSpecialBonus = 300;    
+        
+    const int m_secondsForNextSpecialBonus = 300;
+    const long m_startMoney = 1000000;
     string m_filePath;    
     static PlayerDataManager m_instance;
 
