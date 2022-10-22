@@ -52,12 +52,10 @@ public class CommonUIManager : MonoBehaviour
             {
                 ApplyMyMoneyText();
                 m_isAnimatingMonetText = false;
-                Debug.Log("3 : " + PlayerDataManager.Instance.m_playerData.m_myCurrentMoney);
             }
             else
             {
                 m_myMoneyDisplay.SetNumber(m_currentMoneyToAnimate);
-                Debug.Log("4 : " + PlayerDataManager.Instance.m_playerData.m_myCurrentMoney);
             }
             
         }
@@ -74,7 +72,6 @@ public class CommonUIManager : MonoBehaviour
         m_targetMoneyToAnimate = targetMoney;
         m_currentMoneyToAnimate = m_startMoneyToAnimate;
         m_isAnimatingMonetText = true;
-        Debug.Log("AnimateIncreasingMyMoneyText : " + PlayerDataManager.Instance.m_playerData.m_myCurrentMoney);
     }
     #endregion
 
