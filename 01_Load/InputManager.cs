@@ -8,7 +8,8 @@ public enum GameKey
     AllWilds, NoScatter, Free1, Free2, Free3, Bonus1, Bonus2, Bonus3, Bonus4, Bonus5,
     Free20, Free15, Free10,
     Grandjackpot, Majorjackpot, Minorjacpot, Minijacpot,
-    AddMoney, SubtractMoney
+    AddMoney, SubtractMoney,
+    TimeForSpecialBonus
 }
 
 public class InputManager : MonoBehaviour
@@ -28,6 +29,10 @@ public class InputManager : MonoBehaviour
     static InputManager m_instance;
     Dictionary<GameKey, KeyCode> m_myKeys;
 
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -39,6 +44,18 @@ public class InputManager : MonoBehaviour
     {
 
     }
+
+    #region Public Method
+    public bool CheckKeyDown(GameKey gameKey)
+    {
+        KeyCode keyCode;
+        if (m_myKeys.TryGetValue(gameKey, out keyCode))
+        {
+            return Input.GetKeyDown(keyCode);
+        }
+        return false;
+    }
+    #endregion Public Method
 
     #region Private Method
     void SetMyKeys()
@@ -67,6 +84,7 @@ public class InputManager : MonoBehaviour
         m_myKeys.Add(GameKey.Minijacpot, KeyCode.J);
         m_myKeys.Add(GameKey.AddMoney, KeyCode.K);
         m_myKeys.Add(GameKey.SubtractMoney, KeyCode.L);
+        m_myKeys.Add(GameKey.TimeForSpecialBonus, KeyCode.Z);
     }
     #endregion Private Method
 }
