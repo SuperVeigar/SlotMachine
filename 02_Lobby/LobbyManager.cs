@@ -22,8 +22,10 @@ public class LobbyManager : MonoBehaviour
     public Text m_specialBonusInText;
     public Text m_specialBonusTimeText;
     public Text m_collectSpecialBonusText;
+    public Image m_emptySpecialBonusImage;
     public Button m_specialBonusButton;
     public ParticleSystem m_specialBonusParticle;
+    public ParticleSystem m_gatheringCoinsParticle;
     public AudioClip m_collectingCashSound;
 
     static LobbyManager m_instance;
@@ -60,6 +62,8 @@ public class LobbyManager : MonoBehaviour
         PlayerDataManager.Instance.AddPlayerCurrentMoney(m_specialBonusMoneyAmount);        
         PlayerDataManager.Instance.ResetSpecialBonusTime();
         m_audioSource.PlayOneShot(m_collectingCashSound);
+        m_gatheringCoinsParticle.gameObject.SetActive(false);
+        m_gatheringCoinsParticle.gameObject.SetActive(true);
     }
     public void EnterRockClimberGame()
     {
@@ -89,13 +93,13 @@ public class LobbyManager : MonoBehaviour
         m_isReadySpecialBonus = setOn;
         m_collectSpecialBonusText.gameObject.SetActive(setOn);
         m_specialBonusParticle.gameObject.SetActive(setOn);
+        m_specialBonusButton.gameObject.SetActive(setOn);
         m_specialBonusButton.GetComponent<Animator>().enabled = setOn;
 
+        m_emptySpecialBonusImage.gameObject.SetActive(!setOn);
         m_specialBonusInText.gameObject.SetActive(!setOn);
         m_specialBonusTimeText.gameObject.SetActive(!setOn);
-
-        m_specialBonusButton.interactable = setOn;
-    }
+    }    
     #endregion Private Method
 
     #region Test Method
