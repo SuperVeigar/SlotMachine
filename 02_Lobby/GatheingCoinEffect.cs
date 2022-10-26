@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class GatheingCoinEffect : MonoBehaviour
 {
-    public Transform m_targetTransform;
+    public RectTransform m_targetTransform;
+    public RectTransform m_startTransform;
 
-    const float m_timeToGetParticlesInfo = 0.1f;
-    const float m_timeToSetParticlesVelocity = 1f;
+    const float m_timeToSetParticlesVelocity = 0.1f;
     const float m_timeToTurnOff = 4f;
+    const float m_moveSpeed = 10f;
     ParticleSystem m_coinParicleSystem;
     ParticleSystem.Particle[] m_particles;
         
@@ -26,16 +27,12 @@ public class GatheingCoinEffect : MonoBehaviour
 
     private void OnEnable()
     {
-        StartCoroutine(SetForceToPaticles());
+        //StartCoroutine(SetForceToPaticles());
         //StartCoroutine(TurnOffThis());
     }
 
     #region Public Method    
-    public void GOGOGOGOGOGOGOGO()
-    {
-        gameObject.SetActive(false);
-        gameObject.SetActive(true);
-    }
+    
     #endregion Public Method
 
     #region Private Method
@@ -44,9 +41,14 @@ public class GatheingCoinEffect : MonoBehaviour
         yield return new WaitForSeconds(m_timeToSetParticlesVelocity);
         m_particles = new ParticleSystem.Particle[m_coinParicleSystem.main.maxParticles];
         m_coinParicleSystem.GetParticles(m_particles);
+        Vector3 dir;
         for (int i = 0; i < m_particles.Length; i++)
         {
-            m_particles[i].velocity = new Vector3(10, 10, 0);
+            m_startTransform.position = m_coinParicleSystem.transform.position;
+            m_startTransform.Translate(m_particles[i].position, Space.Self);
+            dir = (m_targetTransform.position - m_startTransform.position).normalized;
+            m_particles[i].velocity = dir * m_moveSpeed;
+            Debug.Log(m_particles[i].velocity);
         }
         m_coinParicleSystem.SetParticles(m_particles, m_particles.Length);
     }
