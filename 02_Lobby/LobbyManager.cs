@@ -17,20 +17,21 @@ public class LobbyManager : MonoBehaviour
             }
             return m_instance;
         }
-    }
-        
+    }    
+
     public Text m_specialBonusInText;
     public Text m_specialBonusTimeText;
     public Text m_collectSpecialBonusText;
     public Image m_emptySpecialBonusImage;
-    public Button m_specialBonusButton;
+    public Image m_specialBonusImage;
     public ParticleSystem m_specialBonusParticle;
     public ParticleSystem m_gatheringCoinsParticle;
     public AudioClip m_collectingCashSound;
 
     static LobbyManager m_instance;
     bool m_isReadySpecialBonus;
-    static int m_specialBonusMoneyAmount = 100000;
+    bool m_isGameStarted;
+    static int m_specialBonusMoneyAmount = 100000;    
     PlayerData m_playerData;
     AudioSource m_audioSource;
 
@@ -41,6 +42,7 @@ public class LobbyManager : MonoBehaviour
         m_playerData = PlayerDataManager.Instance.m_playerData;
         SetActiveCollectSpecialBonus(false);
         m_audioSource = GetComponent<AudioSource>();
+        m_isGameStarted = false;
     }
 
     // Update is called once per frame
@@ -65,9 +67,11 @@ public class LobbyManager : MonoBehaviour
         m_gatheringCoinsParticle.gameObject.SetActive(false);
         m_gatheringCoinsParticle.gameObject.SetActive(true);
     }
-    public void EnterRockClimberGame()
+    public void StartRockClimberGame()
     {
-        SceneManager.LoadScene("03_GamcScene_RockClimber");
+        CommonUIManager.Instance.SetActiveHomeButton(true);
+        CommonUIManager.Instance.SetActiveCommonUI(false);
+        SceneManager.LoadScene("03_0_LoadingScene_RockClimber");
     }   
     #endregion Public Method
 
@@ -87,14 +91,13 @@ public class LobbyManager : MonoBehaviour
             }
         }
     }
-
     void SetActiveCollectSpecialBonus(bool setOn)
     {
         m_isReadySpecialBonus = setOn;
         m_collectSpecialBonusText.gameObject.SetActive(setOn);
         m_specialBonusParticle.gameObject.SetActive(setOn);
-        m_specialBonusButton.gameObject.SetActive(setOn);
-        m_specialBonusButton.GetComponent<Animator>().enabled = setOn;
+        m_specialBonusImage.gameObject.SetActive(setOn);
+        m_specialBonusImage.GetComponent<Animator>().enabled = setOn;
 
         m_emptySpecialBonusImage.gameObject.SetActive(!setOn);
         m_specialBonusInText.gameObject.SetActive(!setOn);

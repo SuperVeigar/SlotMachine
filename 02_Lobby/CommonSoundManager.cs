@@ -24,6 +24,7 @@ public class CommonSoundManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        DontDestroyOnLoad(gameObject);
         m_soundSource = GetComponent<AudioSource>();    
     }
 

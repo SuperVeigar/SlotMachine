@@ -17,6 +17,9 @@ public class CommonUIManager : MonoBehaviour
             return m_instance;
         }
     }
+
+    public Button m_homeBtn;
+    public Image m_fadeImage;
     public Canvas m_CommonUICanvas;
     public NumberDisplay m_myMoneyDisplay;
 
@@ -34,6 +37,7 @@ public class CommonUIManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         DontDestroyOnLoad(m_CommonUICanvas.gameObject);
         ApplyMyMoneyText();
+        m_homeBtn.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -72,6 +76,14 @@ public class CommonUIManager : MonoBehaviour
         m_targetMoneyToAnimate = targetMoney;
         m_currentMoneyToAnimate = m_startMoneyToAnimate;
         m_isAnimatingMonetText = true;
+    }
+    public void SetActiveHomeButton(bool active)
+    {
+        m_homeBtn.gameObject.SetActive(active);
+    }
+    public void SetActiveCommonUI(bool active)
+    {
+        m_CommonUICanvas.enabled = active;
     }
     #endregion
 
