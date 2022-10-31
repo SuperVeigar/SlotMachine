@@ -6,8 +6,6 @@ using UnityEngine.SceneManagement;
 
 public class LoadingSceneManager : MonoBehaviour
 {
-
-
     public static LoadingSceneManager Instance
     {
         get
@@ -36,6 +34,7 @@ public class LoadingSceneManager : MonoBehaviour
     void Start()
     {
         m_lodingSpeed = Mathf.Round(1 / m_loadingTime * 10) * 0.1f;
+        CommonUIManager.Instance.SetActiveCommonUI(false);
     }
 
     // Update is called once per frame
@@ -50,7 +49,7 @@ public class LoadingSceneManager : MonoBehaviour
 
         if(m_loadingBar.fillAmount >= 1)
         {
-            SceneManager.LoadScene("02_LobbyScene");
+            MoveToLobbyScene();
         }
     }
 
@@ -58,6 +57,11 @@ public class LoadingSceneManager : MonoBehaviour
     void AddLoadingSliderValue()
     {
         m_fillAmountOFLoadingProcess += 0.3f;
+    }
+    void MoveToLobbyScene()
+    {
+        CommonUIManager.Instance.SetLobbyMode();
+        SceneManager.LoadScene("02_1_LobbyScene");                
     }
     #endregion
 }

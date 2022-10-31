@@ -30,7 +30,6 @@ public class LobbyManager : MonoBehaviour
 
     static LobbyManager m_instance;
     bool m_isReadySpecialBonus;
-    bool m_isGameStarted;
     static int m_specialBonusMoneyAmount = 100000;    
     PlayerData m_playerData;
     AudioSource m_audioSource;
@@ -42,7 +41,7 @@ public class LobbyManager : MonoBehaviour
         m_playerData = PlayerDataManager.Instance.m_playerData;
         SetActiveCollectSpecialBonus(false);
         m_audioSource = GetComponent<AudioSource>();
-        m_isGameStarted = false;
+        CommonUIManager.Instance.SetActiveCommonUI(true);
     }
 
     // Update is called once per frame
@@ -69,7 +68,8 @@ public class LobbyManager : MonoBehaviour
     }
     public void StartRockClimberGame()
     {
-        CommonUIManager.Instance.SetActiveHomeButton(true);
+        CommonUIManager.Instance.ResetCommonUI();
+        CommonUIManager.Instance.SetGameMode();
         CommonUIManager.Instance.SetActiveCommonUI(false);
         SceneManager.LoadScene("03_0_LoadingScene_RockClimber");
     }   

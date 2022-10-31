@@ -6,6 +6,8 @@ using System;
 
 public class CommonUIManager : MonoBehaviour
 {
+    public event Action ExitGameEvent;
+
     public static CommonUIManager Instance
     {
         get
@@ -19,7 +21,7 @@ public class CommonUIManager : MonoBehaviour
     }
 
     public Button m_homeBtn;
-    public Image m_fadeImage;
+    public MenuDropdown m_menuDropdown;
     public Canvas m_CommonUICanvas;
     public NumberDisplay m_myMoneyDisplay;
 
@@ -30,14 +32,15 @@ public class CommonUIManager : MonoBehaviour
     long m_currentMoneyToAnimate;
     const float m_timeIncreasingMoney = 1.25f;
 
-
+    private void Awake()
+    {
+        PlayerDataManager.Instance.CompleteLoadData += ApplyMyMoneyText;
+    }
     // Start is called before the first frame update
     void Start()
     {
         DontDestroyOnLoad(gameObject);
-        DontDestroyOnLoad(m_CommonUICanvas.gameObject);
-        ApplyMyMoneyText();
-        m_homeBtn.gameObject.SetActive(false);
+        DontDestroyOnLoad(m_CommonUICanvas.gameObject);        
     }
 
     // Update is called once per frame
@@ -77,17 +80,34 @@ public class CommonUIManager : MonoBehaviour
         m_currentMoneyToAnimate = m_startMoneyToAnimate;
         m_isAnimatingMonetText = true;
     }
-    public void SetActiveHomeButton(bool active)
+    public void ResetCommonUI()
     {
-        m_homeBtn.gameObject.SetActive(active);
+        m_menuDropdown.ResetMenu();
+    }
+    public void SetGameMode()
+    {
+        m_homeBtn.gameObject.SetActive(true);
+        m_menuDropdown.SetGameState();
+    }
+    public void SetLobbyMode()
+    {
+        m_homeBtn.gameObject.SetActive(false);
+        m_menuDropdown.SetLobbyState();
     }
     public void SetActiveCommonUI(bool active)
     {
         m_CommonUICanvas.enabled = active;
     }
+    public void ExitGame()
+    {
+        ExitGameEvent();
+    }
     #endregion
 
     #region Private Method
-
+    void InitValues()
+    {
+        m_isAnimatingMonetText = false;
+    }
     #endregion
 }
