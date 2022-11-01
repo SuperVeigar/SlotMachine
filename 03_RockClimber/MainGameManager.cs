@@ -5,11 +5,25 @@ using UnityEngine.SceneManagement;
 
 public class MainGameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
+    static public MainGameManager Instance
+    {
+        get
+        {
+            if (m_instance == null)
+            {
+                m_instance = FindObjectOfType<MainGameManager>();
+            }
+            return m_instance;
+        }
+    }
+
+    static MainGameManager m_instance;
+
+
     void Start()
     {
-        //CommonUIManager.Instance.ExitGameEvent += BackToLobby;
-        //CommonUIManager.Instance.SetActiveCommonUI(true);
+        CommonUIManager.Instance.ExitGameEvent += BackToLobby;
+        CommonUIManager.Instance.SetActiveCommonUI(true);
     }
 
     // Update is called once per frame

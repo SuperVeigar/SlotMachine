@@ -23,6 +23,9 @@ public class CommonUIManager : MonoBehaviour
     public Button m_homeBtn;
     public MenuDropdown m_menuDropdown;
     public Canvas m_CommonUICanvas;
+    public Image m_topBGImage;
+    public Image m_logoBGImage;
+    public Image m_logoImage;
     public NumberDisplay m_myMoneyDisplay;
 
     static CommonUIManager m_instance;
@@ -86,11 +89,17 @@ public class CommonUIManager : MonoBehaviour
     }
     public void SetGameMode()
     {
+        m_topBGImage.enabled = false;
+        m_logoBGImage.enabled = false;
+        m_logoImage.enabled = false;
         m_homeBtn.gameObject.SetActive(true);
         m_menuDropdown.SetGameState();
     }
     public void SetLobbyMode()
     {
+        m_topBGImage.enabled = true;
+        m_logoBGImage.enabled = true;
+        m_logoImage.enabled = true;
         m_homeBtn.gameObject.SetActive(false);
         m_menuDropdown.SetLobbyState();
     }
