@@ -8,7 +8,7 @@ public class LobbyLoadManager : MonoBehaviour
 {
     public Image m_loadingBar;
 
-    const float m_loadingTime = 2f;
+    const float m_loadingTime = 1f;
     float m_lodingSpeed;
 
 

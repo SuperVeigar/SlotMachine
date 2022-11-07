@@ -7,6 +7,7 @@ public enum BET
 {
     _20000 = 0, _10000, _4000, _2000, _1000, _400, _200, _100, _60, _40, _20, _10, _2, _1
 }
+
 public class GameDataManager : MonoBehaviour
 {
     public event Action GameDataInitEvent;
@@ -16,33 +17,33 @@ public class GameDataManager : MonoBehaviour
     {
         get
         {
-            if(m_instance == null)
+            if (m_instance == null)
             {
                 m_instance = FindObjectOfType<GameDataManager>();
             }
             return m_instance;
         }
-    }    
+    }
 
     public int m_totalBet { get; private set; }
+    public int m_totalWin;
+    public int m_mainWin;
+    public int m_bonusWin;
+    public int m_freeWin;
+    public int m_myDisplayMoney;
+    public int m_freeSymbolCount;
+    public int m_freeGameTotalCount;
+    public int m_freeGameCurrentCount;
+    public int m_bonusSymbolCount;
+    public int m_bonusGameTotalCount;
+    public int m_bonusGameCurrentCount;
 
     static GameDataManager m_instance;
     const int m_slotRow = 3;
     const int m_slotCol = 5;
     const int m_maxBetFactor = 20;
     const int m_basicBetFactor = 100;
-    const int m_lines = 50;
-    int m_totalWin;
-    int m_mainWin;
-    int m_bonusWin;
-    int m_freeWin;
-    int m_myDisplayMoney;
-    int m_freeSymbolCount;
-    int m_freeGameTotalCount;
-    int m_freeGameCurrentCount;
-    int m_bonusSymbolCount;
-    int m_bonusGameTotalCount;
-    int m_bonusGameCurrentCount;
+    const int m_lines = 50;    
     BET m_maxBet;
     BET m_bet;
     Dictionary<BET, int> m_totalBetRefDic;
@@ -57,23 +58,49 @@ public class GameDataManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     #region Public Method
+    public void ResetValues()
+    {
+        m_totalWin = 0;
+        m_mainWin = 0;
+        m_bonusWin = 0;
+        m_freeWin = 0;
+        m_myDisplayMoney = 0;
+        m_freeSymbolCount = 0;
+        m_freeGameTotalCount = 0;
+        m_freeGameCurrentCount = 0;
+        m_bonusSymbolCount = 0;
+        m_bonusGameTotalCount = 0;
+        m_bonusGameCurrentCount = 0;
+    }
     public void BetMore()
     {
+        if (!MainGameManager.Instance.IsOnReadyState()) return;
+
         ChangeBet(-1);
         TotalBetChangeEvent();
     }
     public void BetLess()
     {
+        if (!MainGameManager.Instance.IsOnReadyState()) return;
+
         ChangeBet(1);
         TotalBetChangeEvent();
     }
     public BET GetBet()
     {
         return m_bet;
+    }
+    public int GetSlotRow()
+    {
+        return m_slotRow;
+    }
+    public int GetSlotCol()
+    {
+        return m_slotCol;
     }
     #endregion Public Method
 
@@ -110,7 +137,6 @@ public class GameDataManager : MonoBehaviour
             if(refNum > dic.Value)
             {
                 bet = dic.Key;
-                Debug.Log(betFactor + "    " + refNum + "   " + bet);
                 break;
             }
         }

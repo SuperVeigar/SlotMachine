@@ -19,6 +19,8 @@ public class GameUIManager : MonoBehaviour
     }
 
     public Text m_totalBetNum;
+    public Button m_startButton;
+    public Button m_stopButton;
 
     static GameUIManager m_instance;
 
@@ -30,7 +32,7 @@ public class GameUIManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        InitGame();
     }
 
     // Update is called once per frame
@@ -60,9 +62,17 @@ public class GameUIManager : MonoBehaviour
                 break;
         }
     }
+    public void SetStartButtonOn(bool isOn)
+    {
+        m_startButton.gameObject.SetActive(isOn);
+        m_stopButton.gameObject.SetActive(!isOn);
+    }
     #endregion Public Method
 
     #region Private Method
-
+    void InitGame()
+    {
+        SetStartButtonOn(true);
+    }
     #endregion Private Method
 }
