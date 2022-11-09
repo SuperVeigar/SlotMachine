@@ -18,6 +18,7 @@ public class CommonSoundManager : MonoBehaviour
     public bool m_isSoundable;
     public AudioClip m_buttonOverSound;
     public AudioClip m_buttonPushedSound;
+    public AudioClip m_coinSound;
 
     static CommonSoundManager m_instance;
     AudioSource m_soundSource;
@@ -48,5 +49,10 @@ public class CommonSoundManager : MonoBehaviour
         if (!m_isSoundable) return;
 
         m_soundSource.PlayOneShot(m_buttonPushedSound);
+    }
+
+    public void PlayCoinSound()
+    {
+        m_soundSource?.PlayOneShot(m_coinSound);
     }
 }

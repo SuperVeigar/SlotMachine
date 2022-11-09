@@ -19,10 +19,16 @@ public class GameUIManager : MonoBehaviour
     }
 
     public Text m_totalBetNum;
+    public Text m_goodLuckText;
+    public Text m_totalWinText;
+    public Text m_totalWinNum;
+    public Text m_winText;
+    public Text m_winNum;
     public Button m_startButton;
     public Button m_stopButton;
     public Button m_betUpButton;
     public Button m_betDownButton;
+    public Image m_winBoxBG;
     public GameObject m_helpPanel;
 
     static GameUIManager m_instance;
@@ -82,6 +88,30 @@ public class GameUIManager : MonoBehaviour
         SetActiveAllButtons(true);
         CommonSoundManager.Instance.m_isSoundable = true;        
     }
+    public void SetGoodLuckText()
+    {
+        m_goodLuckText.enabled = true;
+        m_totalWinText.enabled = false;
+        m_totalWinNum.enabled = false;
+        m_winText.enabled = false;
+        m_winNum.enabled = false;
+
+        m_winBoxBG.GetComponent<Animator>().SetTrigger("Idle");
+    }
+    public void SetWinTextAndNum(int winNum)
+    {
+        m_goodLuckText.enabled = false;
+        m_totalWinText.enabled = true;
+        m_totalWinNum.enabled = true;
+        m_winText.enabled = true;
+        m_winNum.enabled = true;
+
+        m_winBoxBG.GetComponent<Animator>().SetTrigger("Win");
+        m_winBoxBG.GetComponent<AudioSource>().Play();
+
+        m_totalWinNum.text = string.Format("{0:#,###}", GameDataManager.Instance.m_totalWin);
+        m_winNum.text = string.Format("{0:#,###}", winNum);
+    }
     #endregion Public Method
 
     #region Private Method
@@ -89,6 +119,7 @@ public class GameUIManager : MonoBehaviour
     {
         SetStartButtonOn(true);
         CommonUIManager.Instance.m_menuDropdown.onOpenHelpPanel += OpenHelpPanel;
+        SetGoodLuckText();
     }
     void OpenHelpPanel()
     {

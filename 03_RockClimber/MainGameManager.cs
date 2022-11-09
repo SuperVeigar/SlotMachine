@@ -8,7 +8,7 @@ public enum MainGameState
     Ready = 0, Spin, Stop,
     CheckWin, ShowScatterWin,
     CheckBonus, BonusIntro, BonusGame, BonusEnd,
-    CheckMain, MainReward, MainEnd,
+    CheckMain, FiveOfKinds, MainReward, MainEnd,
     CheckFree, BigWheelIntro, BigWheelGame, BigWheelEnd,
     FreeIntro, FreeReady, FreeSpin, FreeStop, FreeCheckWin, FreeReward, FreeTotalReward, FreeEnd,
     TotalReward, TotalEnd
@@ -55,7 +55,6 @@ public class MainGameManager : MonoBehaviour
     const int m_probability_Pick = m_probability_Tent + 16;
     const float m_timeToActAutoSpin = 2f;
     const float m_timeToSwitchStopButton = 0.5f;
-    WinChecker m_winChecker;
 
     void Start()
     {
@@ -64,7 +63,6 @@ public class MainGameManager : MonoBehaviour
         ResetValues();
         CommonUIManager.Instance.m_menuDropdown.onOpenHelpPanel += PauseGame;
         CommonUIManager.Instance.m_menuDropdown.onCloseHelpPanel += ResumeGame;
-        m_winChecker = GetComponent<WinChecker>();  
     }
 
     // Update is called once per frame
@@ -83,6 +81,7 @@ public class MainGameManager : MonoBehaviour
                 OnStopState();                
                 break;
             case MainGameState.CheckWin:
+                OnCheckWinState();
                 break;
             case MainGameState.ShowScatterWin:
                 break;
@@ -93,12 +92,18 @@ public class MainGameManager : MonoBehaviour
             case MainGameState.BonusGame:
                 break;
             case MainGameState.BonusEnd:
-                break;
+                break; 
             case MainGameState.CheckMain:
+                OnCheckMainState();
+                break;
+            case MainGameState.FiveOfKinds:
+                OnFiveOfKindsState();
                 break;
             case MainGameState.MainReward:
+                OnMainRewardState();
                 break;
             case MainGameState.MainEnd:
+                OnMainEndState();
                 break;
             case MainGameState.CheckFree:
                 break;
@@ -125,6 +130,7 @@ public class MainGameManager : MonoBehaviour
             case MainGameState.FreeEnd:
                 break;
             case MainGameState.TotalReward:
+                OnTotalRewardState();
                 break;
             case MainGameState.TotalEnd:
                 OnTotalEndState();
@@ -140,10 +146,11 @@ public class MainGameManager : MonoBehaviour
         if (m_mainGameState == MainGameState.Ready &&
             PlayerDataManager.Instance.m_playerData.m_myCurrentMoney >= GameDataManager.Instance.m_totalBet)
         {
+            CommonUIManager.Instance.StopIncresingMoneyTextAnim();
+
             PlayerDataManager.Instance.AddPlayerCurrentMoneyAndChangeText(-1 * GameDataManager.Instance.m_totalBet);
 
             GameDataManager.Instance.ResetValues();
-            m_winChecker.ResetValues();
                        
             CalculateMainGame();
             CalculateTotalGame();
@@ -151,11 +158,17 @@ public class MainGameManager : MonoBehaviour
 
             m_reels.StartSpin();
 
+            GameUIManager.Instance.SetGoodLuckText();
+
             m_mainGameState = MainGameState.Spin;
 #if UNITY_EDITOR
             ShowPulledSymbols();
 #endif
-        }        
+        }       
+        else if(m_mainGameState == MainGameState.MainReward)
+        {
+            m_mainGameState = MainGameState.MainEnd;
+        }
     }
     public void StopReels()
     {
@@ -402,8 +415,56 @@ public class MainGameManager : MonoBehaviour
     }
     void OnStopState()
     {
-        m_mainGameState = MainGameState.TotalEnd;
         GameUIManager.Instance.SetStartButtonOn(true);
+        m_mainGameState = MainGameState.CheckWin;        
+    }
+    void OnCheckWinState()
+    {
+        m_reels.CheckWin();
+        m_mainGameState = MainGameState.CheckMain; 
+    }
+    void OnCheckMainState()
+    {
+        if (GameDataManager.Instance.m_mainWin > 0)
+        {
+            m_reels.TurnWinSymbolAnim(true);
+            GameUIManager.Instance.SetWinTextAndNum(GameDataManager.Instance.m_mainWin);
+
+            if (GameDataManager.Instance.m_isFiveOfKinds)
+            {
+                m_mainGameState = MainGameState.FiveOfKinds;
+            }
+            else
+            {
+                m_mainGameState = MainGameState.MainReward;
+            }
+            
+            
+        }
+        else m_mainGameState = MainGameState.MainEnd;
+    }
+    void OnFiveOfKindsState()
+    {
+        Debug.Log("FiveOfKinds");
+        m_mainGameState = MainGameState.MainReward;
+    }
+    void OnMainRewardState()
+    {
+        //m_mainGameState = MainGameState.MainEnd;
+    }
+    void OnMainEndState()
+    {
+        m_reels.TurnWinSymbolAnim(false);
+        PlayerDataManager.Instance.AddPlayerCurrentMoney(GameDataManager.Instance.m_mainWin);
+        m_mainGameState = MainGameState.TotalReward;
+    }
+    void OnTotalRewardState()
+    {
+        if(GameDataManager.Instance.m_totalWin > 0)
+        {
+            CommonUIManager.Instance.AnimateIncreasingMyMoneyText(GameDataManager.Instance.m_myDisplayMoney, GameDataManager.Instance.m_myDisplayMoney + GameDataManager.Instance.m_totalWin);
+        }        
+        m_mainGameState = MainGameState.TotalEnd;
     }
     void OnTotalEndState()
     {
@@ -413,10 +474,10 @@ public class MainGameManager : MonoBehaviour
 
     #region Test
     void ShowPulledSymbols()
-    {
-        Debug.Log("Free : " + GameDataManager.Instance.m_freeSymbolCount + "  /  Bounus : " + GameDataManager.Instance.m_bonusSymbolCount);
+    {        
         string logToPrint;
         Debug.Log("------------------------------------------------------------------");
+        Debug.Log("Free : " + GameDataManager.Instance.m_freeSymbolCount + "  /  Bounus : " + GameDataManager.Instance.m_bonusSymbolCount);
         for (int k = 0; k < GameDataManager.Instance.GetSlotRow(); k++)
         {
             logToPrint = "";
@@ -521,6 +582,12 @@ public class MainGameManager : MonoBehaviour
         ShowPulledSymbols();
         StartCoroutine(SwitchSpinStopButton(false));
         m_reels.StartSpin();
+
+        CommonUIManager.Instance.StopIncresingMoneyTextAnim();
+
+        PlayerDataManager.Instance.AddPlayerCurrentMoneyAndChangeText(-1 * GameDataManager.Instance.m_totalBet);
+
+        GameUIManager.Instance.SetGoodLuckText();
     }
     #endregion Test
 }

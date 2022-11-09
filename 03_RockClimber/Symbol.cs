@@ -18,6 +18,7 @@ public enum SymbolSort
 public class Symbol : MonoBehaviour
 {   
     public bool m_isWon;
+    public bool m_isDisplayingWin;
     public SymbolSort m_symboleSort;
     public Image m_winFrame;
     public Image[] m_idleImageArray;
@@ -38,7 +39,15 @@ public class Symbol : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        switch(m_symbolState)
+        {
+            case SymbolState.Idle:
+                break;
+            case SymbolState.Winable:
+                break;
+            case SymbolState.Win:
+                break;
+        }
     }
 
 
@@ -58,9 +67,26 @@ public class Symbol : MonoBehaviour
     public void ResetValues()
     {
         m_isWon = false;
+        m_isDisplayingWin = false;
         m_winFrame.enabled = false;
         m_bonusWinAnim.GetComponent<Image>().enabled = false;
         m_winEffect.GetComponent<Image>().enabled = false;
+    }
+    public void SetIdleState()
+    {
+        m_winFrame.enabled = false;
+        m_winEffect.GetComponent<Image>().enabled = false;
+    }
+    public void SetWinableState()
+    {
+
+    }
+    public void SetWinState()
+    {
+        if (!m_isWon) return;
+
+        m_winFrame.enabled = true;
+        m_winEffect.GetComponent<Image>().enabled = true;
     }
     #endregion Public Method
 

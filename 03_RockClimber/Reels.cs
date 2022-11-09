@@ -9,12 +9,15 @@ public class Reels : MonoBehaviour
 
     const float m_reelSpinTime = 2f;
     const float m_reelStopInterval = 0.3f;
+    WinChecker m_winChecker;
 
     // Start is called before the first frame update
     void Start()
     {
+        m_winChecker = GetComponent<WinChecker>();
         SetRowCol();
         LoadRandomReels();
+        ConnectSymbols();
         m_reels[4].onSpinEnd += InformFinToMain;
     }
 
@@ -27,7 +30,8 @@ public class Reels : MonoBehaviour
     #region Public Method
     public void StartSpin()
     {
-        for(int i = 0; i < m_reels.Length; i++)
+        m_winChecker.ResetValues();
+        for (int i = 0; i < m_reels.Length; i++)
         {
             m_reels[i].StartSpin(m_reelSpinTime + m_reelStopInterval * i);
         }
@@ -47,6 +51,17 @@ public class Reels : MonoBehaviour
             m_reels[i].StopSpin();
         }
     }
+    public void CheckWin()
+    {
+        m_winChecker?.CheckWin();
+    }
+    public void TurnWinSymbolAnim(bool isOn)
+    {
+        for (int i = 0; i < m_reels.Length; i++)
+        {
+            m_reels[i].TurnWinSymbolAnim(isOn);
+        }
+    }
     #endregion Public Method
 
     #region Private Method
@@ -64,6 +79,20 @@ public class Reels : MonoBehaviour
     void InformFinToMain()
     {
         MainGameManager.Instance.FinishMainSpin();
+    }
+    void ConnectSymbols()
+    {
+        Symbol[,] symbols = new Symbol[GameDataManager.Instance.GetSlotRow(), GameDataManager.Instance.GetSlotCol()];
+
+        for(int row = 0; row < GameDataManager.Instance.GetSlotRow(); row++)
+        {
+            for(int col = 0; col < GameDataManager.Instance.GetSlotCol(); col++)
+            {                
+                symbols[row, col] = m_reels[col].GetSymbol(row + 1);                
+            }
+        }
+
+        m_winChecker.SetSymbols(symbols);
     }
     #endregion Private Method
 }

@@ -85,6 +85,13 @@ public class CommonUIManager : MonoBehaviour
         m_targetMoneyToAnimate = targetMoney;
         m_currentMoneyToAnimate = m_startMoneyToAnimate;
         m_isAnimatingMonetText = true;
+
+        CommonSoundManager.Instance.PlayCoinSound();
+    }
+    public void StopIncresingMoneyTextAnim()
+    {
+        ApplyMyMoneyText();
+        m_isAnimatingMonetText = false;
     }
     public void ResetCommonUI()
     {

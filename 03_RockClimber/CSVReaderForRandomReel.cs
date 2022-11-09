@@ -65,5 +65,7 @@ public class CSVReaderForRandomReel : MonoBehaviour
         {
             reel_4[i] = int.Parse(arrayData[i]);
         }
+
+        reader.Close();
     }
 }

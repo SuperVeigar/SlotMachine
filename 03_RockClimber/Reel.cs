@@ -25,9 +25,9 @@ public class Reel : MonoBehaviour
     int m_randomReelNum;
     int m_switchCount;
     const float m_acceleration = 5000f;
-    const float m_deceleration = -3000f;
+    const float m_deceleration = -5000f;
     float m_currentMoveSpeed;
-    const float m_maxMoveSpeed= 3000f;
+    const float m_maxMoveSpeed= 4000f;
     const float m_dampingSpeed = 1500f;
     float m_spinStartTime;
     float m_spinTime;
@@ -91,6 +91,12 @@ public class Reel : MonoBehaviour
             m_symbols[i].SetRowCol(i, m_col);
         }
     }
+    public Symbol GetSymbol(int row)
+    {
+        if(row < m_symbols.Length) return m_symbols[row];
+
+        return null;
+    }
     public void StartSpin(float spinTime)
     {
         if (m_reelState != ReelState.Idle) return;
@@ -131,6 +137,14 @@ public class Reel : MonoBehaviour
             StopCoroutine(m_spinStopCoroutine);
             m_reelState = ReelState.SpinBreakReady;
         }        
+    }
+    public void TurnWinSymbolAnim(bool isOn)
+    {
+        foreach (Symbol symbol in m_symbols)
+        {
+            if(isOn) symbol.SetWinState();
+            else symbol.SetIdleState();
+        }
     }
     #endregion Public Method
 
