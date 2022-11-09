@@ -29,12 +29,12 @@ public class MainGameManager : MonoBehaviour
     }
 
     public Reels m_reels;
+    public bool m_isPaused { get; private set; }
+    public SymbolSort[,] m_pulledSymbols { get; private set; }
 
-    static MainGameManager m_instance;
-    bool m_isPaused;
+    static MainGameManager m_instance;    
     bool m_isAutoSpin;
-    MainGameState m_mainGameState;
-    SymbolSort[,] m_pulledSymbols;
+    MainGameState m_mainGameState;    
     const int m_probability_1Free = 10;
     const int m_probability_2Free = m_probability_1Free+ 7;
     const int m_probability_3Free = m_probability_2Free + 5;
@@ -55,18 +55,24 @@ public class MainGameManager : MonoBehaviour
     const int m_probability_Pick = m_probability_Tent + 16;
     const float m_timeToActAutoSpin = 2f;
     const float m_timeToSwitchStopButton = 0.5f;
+    WinChecker m_winChecker;
 
     void Start()
     {
         CommonUIManager.Instance.ExitGameEvent += BackToLobby;
         CommonUIManager.Instance.SetActiveCommonUI(true);
         ResetValues();
+        CommonUIManager.Instance.m_menuDropdown.onOpenHelpPanel += PauseGame;
+        CommonUIManager.Instance.m_menuDropdown.onCloseHelpPanel += ResumeGame;
+        m_winChecker = GetComponent<WinChecker>();  
     }
 
     // Update is called once per frame
     void Update()
     {
-        switch(m_mainGameState)
+        if (MainGameManager.Instance.m_isPaused) return;
+
+        switch (m_mainGameState)
         {
             case MainGameState.Ready:
                 CheckGameStartByTestKey();
@@ -74,6 +80,7 @@ public class MainGameManager : MonoBehaviour
             case MainGameState.Spin:
                 break;
             case MainGameState.Stop:
+                OnStopState();                
                 break;
             case MainGameState.CheckWin:
                 break;
@@ -120,6 +127,7 @@ public class MainGameManager : MonoBehaviour
             case MainGameState.TotalReward:
                 break;
             case MainGameState.TotalEnd:
+                OnTotalEndState();
                 break;
         }
     }
@@ -127,41 +135,59 @@ public class MainGameManager : MonoBehaviour
     #region Public Method
     public void StartGame()
     {
-        if(m_mainGameState == MainGameState.Ready)
-        {
-            GameDataManager.Instance.ResetValues();
+        if (MainGameManager.Instance.m_isPaused) return;
 
-            m_mainGameState = MainGameState.Spin;            
+        if (m_mainGameState == MainGameState.Ready &&
+            PlayerDataManager.Instance.m_playerData.m_myCurrentMoney >= GameDataManager.Instance.m_totalBet)
+        {
+            PlayerDataManager.Instance.AddPlayerCurrentMoneyAndChangeText(-1 * GameDataManager.Instance.m_totalBet);
+
+            GameDataManager.Instance.ResetValues();
+            m_winChecker.ResetValues();
+                       
             CalculateMainGame();
             CalculateTotalGame();
-            ShowPulledSymbols();
             StartCoroutine(SwitchSpinStopButton(false));
 
             m_reels.StartSpin();
+
+            m_mainGameState = MainGameState.Spin;
+#if UNITY_EDITOR
+            ShowPulledSymbols();
+#endif
         }        
     }
     public void StopReels()
     {
+        if (MainGameManager.Instance.m_isPaused) return;
+
         if (m_mainGameState == MainGameState.Spin)
         {
-            m_mainGameState = MainGameState.Ready;
-            StartCoroutine(SwitchSpinStopButton(true));
+            m_reels.StopSpin();
         }
     }
     public bool IsOnReadyState()
     {
         return m_mainGameState == MainGameState.Ready;
     }
+    public void FinishMainSpin()
+    {
+        m_mainGameState = MainGameState.Stop;
+    }
     #endregion Public Method
 
     #region Private Method
     void BackToLobby()
     {
+        if (MainGameManager.Instance.m_isPaused) return;
+
         CommonUIManager.Instance.SetActiveCommonUI(false);
         CommonUIManager.Instance.ResetCommonUI();
         CommonUIManager.Instance.SetLobbyMode();
         SceneManager.LoadScene("02_0_LoadingScene_Lobby");
         CommonUIManager.Instance.ExitGameEvent -= BackToLobby;
+        CommonUIManager.Instance.m_menuDropdown.onOpenHelpPanel -= PauseGame;
+        CommonUIManager.Instance.m_menuDropdown.onCloseHelpPanel -= ResumeGame;
     }
     void ResetValues()
     {
@@ -169,6 +195,16 @@ public class MainGameManager : MonoBehaviour
         m_isAutoSpin = false;
         m_mainGameState = MainGameState.Ready;
         m_pulledSymbols = new SymbolSort[3,5];
+    }
+    void PauseGame()
+    {
+        m_isPaused = true;
+        m_reels.PauseGame();
+    }
+    void ResumeGame()
+    {
+        m_isPaused = false;
+        m_reels.ResumeGame();
     }
     void CalculateMainGame()
     {
@@ -364,6 +400,15 @@ public class MainGameManager : MonoBehaviour
 
         GameUIManager.Instance.SetStartButtonOn(isSpinButonOn);
     }
+    void OnStopState()
+    {
+        m_mainGameState = MainGameState.TotalEnd;
+        GameUIManager.Instance.SetStartButtonOn(true);
+    }
+    void OnTotalEndState()
+    {
+        m_mainGameState = MainGameState.Ready;
+    }
     #endregion Private Method
 
     #region Test
@@ -385,7 +430,9 @@ public class MainGameManager : MonoBehaviour
     }    
     void CheckGameStartByTestKey()
     {
-        if(InputManager.Instance.CheckKeyDown(GameKey.AllWilds))
+        if (MainGameManager.Instance.m_isPaused) return;
+
+        if (InputManager.Instance.CheckKeyDown(GameKey.AllWilds))
         {
             GameDataManager.Instance.ResetValues();
             for (int i = 0; i < GameDataManager.Instance.GetSlotCol(); i++)

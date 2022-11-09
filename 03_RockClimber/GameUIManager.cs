@@ -21,6 +21,9 @@ public class GameUIManager : MonoBehaviour
     public Text m_totalBetNum;
     public Button m_startButton;
     public Button m_stopButton;
+    public Button m_betUpButton;
+    public Button m_betDownButton;
+    public GameObject m_helpPanel;
 
     static GameUIManager m_instance;
 
@@ -39,6 +42,10 @@ public class GameUIManager : MonoBehaviour
     void Update()
     {
         
+    }
+    private void OnDestroy()
+    {
+        CommonUIManager.Instance.m_menuDropdown.onOpenHelpPanel -= OpenHelpPanel;
     }
 
     #region Public Method
@@ -67,12 +74,35 @@ public class GameUIManager : MonoBehaviour
         m_startButton.gameObject.SetActive(isOn);
         m_stopButton.gameObject.SetActive(!isOn);
     }
+    public void CloseHelpPanel()
+    {
+        CommonUIManager.Instance.m_menuDropdown.CloseHelpPanel();
+        m_helpPanel.SetActive(false);
+        CommonUIManager.Instance.SetActiveAllButtons(true);
+        SetActiveAllButtons(true);
+        CommonSoundManager.Instance.m_isSoundable = true;        
+    }
     #endregion Public Method
 
     #region Private Method
     void InitGame()
     {
         SetStartButtonOn(true);
+        CommonUIManager.Instance.m_menuDropdown.onOpenHelpPanel += OpenHelpPanel;
+    }
+    void OpenHelpPanel()
+    {
+        m_helpPanel.SetActive(true);
+        CommonUIManager.Instance.SetActiveAllButtons(false);
+        SetActiveAllButtons(false);
+        CommonSoundManager.Instance.m_isSoundable = false;
+    }
+    void SetActiveAllButtons(bool active)
+    {
+        m_startButton.interactable = active;
+        m_stopButton.interactable = active;
+        m_betUpButton.interactable = active;
+        m_betDownButton.interactable = active;
     }
     #endregion Private Method
 }

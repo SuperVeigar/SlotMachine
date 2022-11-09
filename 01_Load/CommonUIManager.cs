@@ -21,6 +21,9 @@ public class CommonUIManager : MonoBehaviour
     }
 
     public Button m_homeBtn;
+    public Button m_shopBtn;
+    public Button m_friendsBtn;
+    public Button m_menuButton;
     public MenuDropdown m_menuDropdown;
     public Canvas m_CommonUICanvas;
     public Image m_topBGImage;
@@ -110,6 +113,13 @@ public class CommonUIManager : MonoBehaviour
     public void ExitGame()
     {
         ExitGameEvent();
+    }
+    public void SetActiveAllButtons(bool active)
+    {
+        m_homeBtn.interactable = active;
+        m_shopBtn.interactable = active;
+        m_friendsBtn.interactable = active;
+        m_menuButton.interactable = active;
     }
     #endregion
 

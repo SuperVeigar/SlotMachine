@@ -32,7 +32,7 @@ public class Symbol : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ResetValues();        
+        InitValues();        
     }
 
     // Update is called once per frame
@@ -48,26 +48,30 @@ public class Symbol : MonoBehaviour
         m_row = row;
         m_col = col;
 
-        InitGame();
+        InitSort();
     }
     public void SwitchSymbol(SymbolSort upperSymbolSort)
     {
         m_symboleSort = upperSymbolSort;
         SetIdleImage(m_symboleSort);
     }
-    #endregion Public Method
-
-
-    #region Private Method
-    void ResetValues()
+    public void ResetValues()
     {
         m_isWon = false;
-        m_symbolState = SymbolState.Idle;        
         m_winFrame.enabled = false;
         m_bonusWinAnim.GetComponent<Image>().enabled = false;
         m_winEffect.GetComponent<Image>().enabled = false;
     }
-    void InitGame()
+    #endregion Public Method
+
+
+    #region Private Method
+    void InitValues()
+    {
+        m_symbolState = SymbolState.Idle;
+        ResetValues();
+    }    
+    void InitSort()
     {
         if(m_row == 0 ||
             m_row == GameDataManager.Instance.GetSlotRow() + 1)

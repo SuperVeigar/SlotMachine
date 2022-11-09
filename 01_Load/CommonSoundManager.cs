@@ -15,6 +15,7 @@ public class CommonSoundManager : MonoBehaviour
             return m_instance;
         }
     }
+    public bool m_isSoundable;
     public AudioClip m_buttonOverSound;
     public AudioClip m_buttonPushedSound;
 
@@ -25,7 +26,8 @@ public class CommonSoundManager : MonoBehaviour
     void Start()
     {
         DontDestroyOnLoad(gameObject);
-        m_soundSource = GetComponent<AudioSource>();    
+        m_soundSource = GetComponent<AudioSource>();
+        m_isSoundable = true;
     }
 
     // Update is called once per frame
@@ -36,11 +38,15 @@ public class CommonSoundManager : MonoBehaviour
 
     public void PlayButtonOverSound()
     {
+        if (!m_isSoundable) return;
+
         m_soundSource.PlayOneShot(m_buttonOverSound);
     }
 
     public void PlayButtonPushedSound()
     {
+        if (!m_isSoundable) return;
+
         m_soundSource.PlayOneShot(m_buttonPushedSound);
     }
 }

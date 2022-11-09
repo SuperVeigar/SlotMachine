@@ -78,17 +78,23 @@ public class GameDataManager : MonoBehaviour
     }
     public void BetMore()
     {
-        if (!MainGameManager.Instance.IsOnReadyState()) return;
+        if (!MainGameManager.Instance.IsOnReadyState() ||
+            MainGameManager.Instance.m_isPaused) return;
 
         ChangeBet(-1);
         TotalBetChangeEvent();
     }
     public void BetLess()
     {
-        if (!MainGameManager.Instance.IsOnReadyState()) return;
+        if (!MainGameManager.Instance.IsOnReadyState() ||
+            MainGameManager.Instance.m_isPaused) return;
 
         ChangeBet(1);
         TotalBetChangeEvent();
+    }
+    public int GetLine()
+    {
+        return m_lines;
     }
     public BET GetBet()
     {

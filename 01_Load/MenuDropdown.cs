@@ -1,10 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MenuDropdown : MonoBehaviour
 {
+    public event Action onOpenHelpPanel;
+    public event Action onCloseHelpPanel;
+
     public enum MenuDropdownState { Open = 0, Close }
     public Button m_helpBtn;
     public Button m_myInfoBtn; 
@@ -86,6 +90,15 @@ public class MenuDropdown : MonoBehaviour
     public void ResetMenu()
     {
         CallMenuDropdown(MenuDropdownState.Close);
+    }
+    public void OpenHelpPanel()
+    {
+        CallMenuDropdown(MenuDropdownState.Close);
+        onOpenHelpPanel();
+    }
+    public void CloseHelpPanel()
+    {
+        onCloseHelpPanel();
     }
     #endregion Public Method
 

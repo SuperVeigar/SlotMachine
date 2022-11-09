@@ -46,7 +46,7 @@ public class PlayerDataManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        m_filePath = Path.Combine(Application.dataPath, "PlayerData.json");
+        m_filePath = Path.Combine(Application.dataPath, "Resources/", "PlayerData.json");
         m_playerData = new PlayerData();    
         LoadPlayerData();
         SavePlayerData();
@@ -69,6 +69,11 @@ public class PlayerDataManager : MonoBehaviour
             m_playerData.m_myCurrentMoney += money;
             SavePlayerData();
         }
+    }
+    public void AddPlayerCurrentMoneyAndChangeText(int money)
+    {
+        AddPlayerCurrentMoney(money);
+        CommonUIManager.Instance.ApplyMyMoneyText();
     }
     public void ResetSpecialBonusTime()
     {
@@ -115,11 +120,6 @@ public class PlayerDataManager : MonoBehaviour
     {
         m_playerData.m_timeToCollectSpecialBonus = DateTime.Now.AddSeconds(seconds);
         SavePlayerData();
-    }
-    void AddPlayerCurrentMoneyAndChangeText(int money)
-    {
-        AddPlayerCurrentMoney(money);
-        CommonUIManager.Instance.ApplyMyMoneyText();
-    }
+    }    
     #endregion Test Method
 }
