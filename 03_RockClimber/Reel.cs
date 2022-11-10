@@ -135,6 +135,7 @@ public class Reel : MonoBehaviour
         {
             m_isForcedToStop = true;
             StopCoroutine(m_spinStopCoroutine);
+            m_audiosource.Stop();
             m_reelState = ReelState.SpinBreakReady;
         }        
     }

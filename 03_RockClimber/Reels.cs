@@ -10,7 +10,7 @@ public class Reels : MonoBehaviour
 
     const float m_reelSpinTime = 2f;
     const float m_reelStopInterval = 0.3f;
-    const float m_winableScatterTime = 1.5f;
+    const float m_winableScatterTime = 1.6f;
     AudioSource m_audiosource;
     WinChecker m_winChecker;
 
@@ -39,17 +39,29 @@ public class Reels : MonoBehaviour
     {
         Debug.Log("refBonus : " + refBonus[0] + refBonus[1] + refBonus[2] + refBonus[3] + refBonus[4] + "  refFree  : " + refFree[0] + refFree[1] + refFree[2] + refFree[3] + refFree[4]);
         m_winChecker.ResetValues();
+        TurnWinSymbolAnim(false);
         m_audiosource.PlayOneShot(m_slotStartSound);
 
         int bonusCount = 0;
         int freeCount = 0;
         int scatterTimeCount = 1;
+        bool isFreeWinable = false;
         for (int i = 0; i < m_reels.Length; i++)
         {
-            if ((bonusCount >= 2 || freeCount >= 2) &&
+            if (bonusCount >= 2 &&
                 i >= 2)
             {
                 m_reels[i].StartSpin(m_reelSpinTime + m_reelStopInterval * i + m_winableScatterTime * scatterTimeCount++, true);
+            }
+            else if (freeCount == 2 &&
+                i == 3)                
+            {
+                m_reels[i].StartSpin(m_reelSpinTime + m_reelStopInterval * i + m_winableScatterTime * scatterTimeCount, true);
+                isFreeWinable = true;          
+            }
+            else if (isFreeWinable)
+            {
+                m_reels[i].StartSpin(m_reelSpinTime + m_reelStopInterval * i + m_winableScatterTime * scatterTimeCount, false);
             }
             else
             {

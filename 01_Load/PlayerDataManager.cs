@@ -122,8 +122,16 @@ public class PlayerDataManager : MonoBehaviour
     #region Test Method
     void TestGame()
     {
-        if (InputManager.Instance.CheckKeyDown(GameKey.AddMoney)) AddPlayerCurrentMoneyAndChangeText(100000);
-        else if (InputManager.Instance.CheckKeyDown(GameKey.ResetMoney)) ResetPlayerCurrentMoneyAndChangeText();
+        if (InputManager.Instance.CheckKeyDown(GameKey.AddMoney))
+        {
+            AddPlayerCurrentMoneyAndChangeText(100000);
+            GameDataManager.Instance.UpdateMaxBet();
+        }
+        else if (InputManager.Instance.CheckKeyDown(GameKey.ResetMoney))
+        {            
+            ResetPlayerCurrentMoneyAndChangeText();
+            GameDataManager.Instance.UpdateMaxBet();
+        }
     }
     public void SetSpecialBonusTime(int seconds)
     {

@@ -6,9 +6,10 @@ using UnityEngine.SceneManagement;
 public enum MainGameState
 {
     Ready = 0, Spin, Stop,
-    CheckWin, ShowScatterWin,
-    CheckBonus, BonusIntro, BonusGame, BonusEnd,
+    CheckWin, 
     CheckMain, FiveOfKinds, MainReward, MainEnd,
+    ShowScatterWin,
+    CheckBonus, BonusIntro, BonusGame, BonusEnd,    
     CheckFree, BigWheelIntro, BigWheelGame, BigWheelEnd,
     FreeIntro, FreeReady, FreeSpin, FreeStop, FreeCheckWin, FreeReward, FreeTotalReward, FreeEnd,
     TotalReward, TotalEnd
@@ -58,6 +59,7 @@ public class MainGameManager : MonoBehaviour
     int[] m_refFree;
     const float m_timeToActAutoSpin = 2f;
     const float m_timeToSwitchStopButton = 0.5f;
+    const float m_timeToShowMainWinBeforeFreeOrBonus = 1f;
 
     void Start()
     {
@@ -81,6 +83,7 @@ public class MainGameManager : MonoBehaviour
                 CheckGameStartByTestKey();
                 break;
             case MainGameState.Spin:
+                OnSpinState();
                 break;
             case MainGameState.Stop:
                 OnStopState();                
@@ -88,16 +91,6 @@ public class MainGameManager : MonoBehaviour
             case MainGameState.CheckWin:
                 OnCheckWinState();
                 break;
-            case MainGameState.ShowScatterWin:
-                break;
-            case MainGameState.CheckBonus:
-                break;
-            case MainGameState.BonusIntro:
-                break;
-            case MainGameState.BonusGame:
-                break;
-            case MainGameState.BonusEnd:
-                break; 
             case MainGameState.CheckMain:
                 OnCheckMainState();
                 break;
@@ -110,6 +103,17 @@ public class MainGameManager : MonoBehaviour
             case MainGameState.MainEnd:
                 OnMainEndState();
                 break;
+            case MainGameState.ShowScatterWin:
+                OnShowScatterWin();
+                break;
+            case MainGameState.CheckBonus:
+                break;
+            case MainGameState.BonusIntro:
+                break;
+            case MainGameState.BonusGame:
+                break;
+            case MainGameState.BonusEnd:
+                break; 
             case MainGameState.CheckFree:
                 break;
             case MainGameState.BigWheelIntro:
@@ -173,7 +177,7 @@ public class MainGameManager : MonoBehaviour
         }       
         else if(m_mainGameState == MainGameState.MainReward)
         {
-            m_mainGameState = MainGameState.MainEnd;
+            MoveToMainEndFromMainReward();
         }
     }
     public void StopReels()
@@ -441,6 +445,13 @@ public class MainGameManager : MonoBehaviour
 
         GameUIManager.Instance.SetStartButtonOn(isSpinButonOn);
     }
+    void OnSpinState()
+    {
+        if (InputManager.Instance.CheckKeyDown(GameKey.Spin))
+        {
+            StopReels();
+        }
+    }
     void OnStopState()
     {
         GameUIManager.Instance.SetStartButtonOn(true);
@@ -483,12 +494,47 @@ public class MainGameManager : MonoBehaviour
     }
     void OnMainRewardState()
     {
-        
+        // SpinKey 누르거나 SpinBtn 누르면 넘어감
+        if (InputManager.Instance.CheckKeyDown(GameKey.Spin))
+        {
+            MoveToMainEndFromMainReward();
+        }
+        // Free나 Bonus 시 m_timeToShowMainWinBeforeFreeOrBonus 만큼 보여주거 넘어감
+        else if (IsBonusOrFreeOnNext())
+        {
+            StartCoroutine(MoveToMainEndFromMainRewardWithFreeOrBonus());
+        }
+    }
+    bool IsBonusOrFreeOnNext()
+    {
+        if (GameDataManager.Instance.m_freeSymbolCount == 3 ||
+            GameDataManager.Instance.m_bonusSymbolCount >= 3) return true;
+
+        return false;
+    }
+    void MoveToMainEndFromMainReward()
+    {
+        if(IsBonusOrFreeOnNext()) StopCoroutine(MoveToMainEndFromMainRewardWithFreeOrBonus());
+        m_mainGameState = MainGameState.MainEnd;
+    }
+    IEnumerator MoveToMainEndFromMainRewardWithFreeOrBonus()
+    {
+        yield return new WaitForSeconds(m_timeToShowMainWinBeforeFreeOrBonus);
+
+        m_mainGameState = MainGameState.MainEnd;
     }
     void OnMainEndState()
-    {
-        m_reels.TurnWinSymbolAnim(false);
+    {        
         PlayerDataManager.Instance.AddPlayerCurrentMoney(GameDataManager.Instance.m_mainWin);
+        if (IsBonusOrFreeOnNext())
+        {
+            m_reels.TurnWinSymbolAnim(false);
+            m_mainGameState = MainGameState.ShowScatterWin;
+        }
+        else m_mainGameState = MainGameState.TotalReward;
+    }
+    void OnShowScatterWin()
+    {
         m_mainGameState = MainGameState.TotalReward;
     }
     void OnTotalRewardState()
@@ -497,6 +543,7 @@ public class MainGameManager : MonoBehaviour
         {
             CommonUIManager.Instance.AnimateIncreasingMyMoneyText(GameDataManager.Instance.m_myDisplayMoney, GameDataManager.Instance.m_myDisplayMoney + GameDataManager.Instance.m_totalWin);
             GameSoundManager.Instance?.PlayWinCoinSound();
+            GameDataManager.Instance.UpdateMaxBet();
         }        
         m_mainGameState = MainGameState.TotalEnd;
     }
@@ -620,6 +667,10 @@ public class MainGameManager : MonoBehaviour
             GameDataManager.Instance.m_bonusSymbolCount = 5;
             SetBonusScatter(GameDataManager.Instance.m_bonusSymbolCount);
             StartGameByTestKey();
+        }
+        else if(InputManager.Instance.CheckKeyDown(GameKey.Spin))
+        {
+            StartGame();
         }
     }
     void StartGameByTestKey()

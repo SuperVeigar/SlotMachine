@@ -145,6 +145,14 @@ public class GameDataManager : MonoBehaviour
         m_mainWin += (winValue * m_totalBet);
         m_totalWin += (winValue * m_totalBet);
     }
+    public void UpdateMaxBet()
+    {
+        m_maxBet = CalcBetLimit(m_maxBetFactor);
+        if(m_bet < m_maxBet)
+        {
+            m_bet = m_maxBet;
+        }
+    }
     #endregion Public Method
 
     #region Private Method
