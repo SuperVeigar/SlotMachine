@@ -16,7 +16,7 @@ public enum SymbolSort
 }
 
 public class Symbol : MonoBehaviour
-{   
+{
     public bool m_isWon;
     public bool m_isDisplayingWin;
     public SymbolSort m_symboleSort;
@@ -24,26 +24,27 @@ public class Symbol : MonoBehaviour
     public Image[] m_idleImageArray;
     public Animator m_bonusWinAnim;
     public Animator m_winEffect;
-        
+
     int m_row;
     int m_col;
-    
     SymbolState m_symbolState;
+    GameObject m_currentSymbol;
 
     // Start is called before the first frame update
     void Start()
     {
-        InitValues();        
+        InitValues();
     }
 
     // Update is called once per frame
     void Update()
     {
-        switch(m_symbolState)
+        switch (m_symbolState)
         {
             case SymbolState.Idle:
                 break;
             case SymbolState.Winable:
+                OnWinableState();
                 break;
             case SymbolState.Win:
                 break;
@@ -88,6 +89,23 @@ public class Symbol : MonoBehaviour
         m_winFrame.enabled = true;
         m_winEffect.GetComponent<Image>().enabled = true;
     }
+    public void CheckWinable(bool isForcedToStop)
+    {
+        if (isForcedToStop ||
+            m_row == 0 ||
+            m_row == 4 ||
+            m_symbolState != SymbolState.Idle) return;
+
+        if(m_symboleSort == SymbolSort.Bonus)
+        {
+            if (m_col < 4)
+            {
+                m_currentSymbol.GetComponent<Animator>()?.SetTrigger("Winable");
+                StartCoroutine(PlayWinableSound());
+                m_symbolState = SymbolState.Winable;
+            }
+        }        
+    }    
     #endregion Public Method
 
 
@@ -113,22 +131,33 @@ public class Symbol : MonoBehaviour
     void SetIdleImage(SymbolSort symbolSort)
     {
         foreach (Image img in m_idleImageArray) img.enabled = false;
-
+        Image currentImage;
         switch(m_symboleSort)
         {
             case SymbolSort.Wild:
-                m_idleImageArray[(int)SymbolSort.Bigfoot + 1].enabled = true;
+                currentImage = m_idleImageArray[(int)SymbolSort.Bigfoot + 1];
                 break;
             case SymbolSort.Free:
-                m_idleImageArray[(int)SymbolSort.Bigfoot + 2].enabled = true;
+                currentImage = m_idleImageArray[(int)SymbolSort.Bigfoot + 2];
                 break;
             case SymbolSort.Bonus:
-                m_idleImageArray[(int)SymbolSort.Bigfoot + 3].enabled = true;
+                currentImage = m_idleImageArray[(int)SymbolSort.Bigfoot + 3];
                 break;
             default:
-                m_idleImageArray[(int)m_symboleSort].enabled = true;
+                currentImage = m_idleImageArray[(int)m_symboleSort];                
                 break;
         }
+        currentImage.enabled = true;
+        m_currentSymbol = currentImage.gameObject;
+    }
+    void OnWinableState()
+    {
+        m_symbolState = SymbolState.Idle;
+    }
+    IEnumerator PlayWinableSound()
+    {
+        yield return new WaitForSeconds(0.15f);
+        m_currentSymbol.GetComponent<AudioSource>()?.Play();
     }
     #endregion Private Method
 }

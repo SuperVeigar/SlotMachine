@@ -54,6 +54,8 @@ public class MainGameManager : MonoBehaviour
     const int m_probability_Hook = m_probability_Shoes + 14;
     const int m_probability_Tent = m_probability_Hook + 16;
     const int m_probability_Pick = m_probability_Tent + 16;
+    int[] m_refBonus;
+    int[] m_refFree;
     const float m_timeToActAutoSpin = 2f;
     const float m_timeToSwitchStopButton = 0.5f;
 
@@ -61,6 +63,7 @@ public class MainGameManager : MonoBehaviour
     {
         CommonUIManager.Instance.ExitGameEvent += BackToLobby;
         CommonUIManager.Instance.SetActiveCommonUI(true);
+        InitValues();
         ResetValues();
         CommonUIManager.Instance.m_menuDropdown.onOpenHelpPanel += PauseGame;
         CommonUIManager.Instance.m_menuDropdown.onCloseHelpPanel += ResumeGame;
@@ -152,13 +155,14 @@ public class MainGameManager : MonoBehaviour
 
             PlayerDataManager.Instance.AddPlayerCurrentMoneyAndChangeText(-1 * GameDataManager.Instance.m_totalBet);
 
+            ResetValues();
             GameDataManager.Instance.ResetValues();
                        
             CalculateMainGame();
             CalculateTotalGame();
             StartCoroutine(SwitchSpinStopButton(false));
 
-            m_reels.StartSpin();
+            m_reels.StartSpin(m_refBonus, m_refFree);
 
             GameUIManager.Instance.SetGoodLuckText();
 
@@ -204,12 +208,22 @@ public class MainGameManager : MonoBehaviour
         CommonUIManager.Instance.m_menuDropdown.onOpenHelpPanel -= PauseGame;
         CommonUIManager.Instance.m_menuDropdown.onCloseHelpPanel -= ResumeGame;
     }
+    void InitValues()
+    {
+        m_isAutoSpin = false;
+        m_mainGameState = MainGameState.Ready;
+        m_pulledSymbols = new SymbolSort[3, 5];
+        m_refBonus = new int[GameDataManager.Instance.GetSlotCol()];
+        m_refFree = new int[GameDataManager.Instance.GetSlotCol()];
+    }
     void ResetValues()
     {
         m_isPaused = false;
-        m_isAutoSpin = false;
-        m_mainGameState = MainGameState.Ready;
-        m_pulledSymbols = new SymbolSort[3,5];
+        for(int i = 0; i < GameDataManager.Instance.GetSlotCol(); i++)
+        {
+            m_refBonus[i] = 0;
+            m_refFree[i] = 0;
+        }
     }
     void PauseGame()
     {
@@ -309,6 +323,7 @@ public class MainGameManager : MonoBehaviour
             int col = Random.Range(1, 4);
 
             m_pulledSymbols[row, col] = SymbolSort.Free;
+            m_refFree[col] = 1;
         }
         else if (freeCount == 2)
         {
@@ -327,6 +342,8 @@ public class MainGameManager : MonoBehaviour
 
             m_pulledSymbols[row1, col1] = SymbolSort.Free;
             m_pulledSymbols[row2, col2] = SymbolSort.Free;
+            m_refFree[col1] = 1;
+            m_refFree[col2] = 1;
         }
         else if (freeCount == 3)
         {
@@ -337,6 +354,9 @@ public class MainGameManager : MonoBehaviour
             m_pulledSymbols[row1, 1] = SymbolSort.Free;
             m_pulledSymbols[row2, 2] = SymbolSort.Free;
             m_pulledSymbols[row3, 3] = SymbolSort.Free;
+            m_refFree[1] = 1;
+            m_refFree[2] = 1;
+            m_refFree[3] = 1;
         }
     }
     void SetBonusScatter(int bonusCount)
@@ -349,6 +369,7 @@ public class MainGameManager : MonoBehaviour
             int col = Random.Range(0, 5);
 
             m_pulledSymbols[row, col] = SymbolSort.Bonus;
+            m_refBonus[col] = 1;
         }
         else if (bonusCount == 2)
         {
@@ -367,6 +388,8 @@ public class MainGameManager : MonoBehaviour
 
             m_pulledSymbols[row1, col1] = SymbolSort.Bonus;
             m_pulledSymbols[row2, col2] = SymbolSort.Bonus;
+            m_refBonus[col1] = 1;
+            m_refBonus[col2] = 1;
         }
         else if (bonusCount == 3)
         {
@@ -386,6 +409,7 @@ public class MainGameManager : MonoBehaviour
                     i != col2_not)
                 {
                     m_pulledSymbols[Random.Range(0, 3), i] = SymbolSort.Bonus;
+                    m_refBonus[i] = 1;
                 }
             }
         }
@@ -398,6 +422,7 @@ public class MainGameManager : MonoBehaviour
                 if (i != col1_not)
                 {
                     m_pulledSymbols[Random.Range(0, 3), i] = SymbolSort.Bonus;
+                    m_refBonus[i] = 1;
                 }
             }
         }
@@ -406,6 +431,7 @@ public class MainGameManager : MonoBehaviour
             for (int i = 0; i < GameDataManager.Instance.GetSlotCol(); i++)
             {
                 m_pulledSymbols[Random.Range(0, 3), i] = SymbolSort.Bonus;
+                m_refBonus[i] = 1;
             }
         }
     }    
@@ -501,8 +527,10 @@ public class MainGameManager : MonoBehaviour
     {
         if (MainGameManager.Instance.m_isPaused) return;
 
+
         if (InputManager.Instance.CheckKeyDown(GameKey.AllWilds))
         {
+            ResetValues();
             GameDataManager.Instance.ResetValues();
             for (int i = 0; i < GameDataManager.Instance.GetSlotCol(); i++)
             {
@@ -515,6 +543,7 @@ public class MainGameManager : MonoBehaviour
         }
         else if (InputManager.Instance.CheckKeyDown(GameKey.FiveOfKind))
         {
+            ResetValues();
             GameDataManager.Instance.ResetValues();
             CalculateMainGame();
             SetFiveOfKind();
@@ -522,6 +551,7 @@ public class MainGameManager : MonoBehaviour
         }
         else if (InputManager.Instance.CheckKeyDown(GameKey.Free1))
         {
+            ResetValues();
             GameDataManager.Instance.ResetValues();
             CalculateMainGame();
             GameDataManager.Instance.m_freeSymbolCount = 1;
@@ -530,6 +560,7 @@ public class MainGameManager : MonoBehaviour
         }
         else if (InputManager.Instance.CheckKeyDown(GameKey.Free2))
         {
+            ResetValues();
             GameDataManager.Instance.ResetValues();
             CalculateMainGame();
             GameDataManager.Instance.m_freeSymbolCount = 2;
@@ -538,6 +569,7 @@ public class MainGameManager : MonoBehaviour
         }
         else if (InputManager.Instance.CheckKeyDown(GameKey.Free3))
         {
+            ResetValues();
             GameDataManager.Instance.ResetValues();
             CalculateMainGame();
             GameDataManager.Instance.m_freeSymbolCount = 3;
@@ -546,6 +578,7 @@ public class MainGameManager : MonoBehaviour
         }
         else if (InputManager.Instance.CheckKeyDown(GameKey.Bonus1))
         {
+            ResetValues();
             GameDataManager.Instance.ResetValues();
             CalculateMainGame();
             GameDataManager.Instance.m_bonusSymbolCount = 1;
@@ -554,6 +587,7 @@ public class MainGameManager : MonoBehaviour
         }
         else if (InputManager.Instance.CheckKeyDown(GameKey.Bonus2))
         {
+            ResetValues();
             GameDataManager.Instance.ResetValues();
             CalculateMainGame();
             GameDataManager.Instance.m_bonusSymbolCount = 2;
@@ -562,6 +596,7 @@ public class MainGameManager : MonoBehaviour
         }
         else if (InputManager.Instance.CheckKeyDown(GameKey.Bonus3))
         {
+            ResetValues();
             GameDataManager.Instance.ResetValues();
             CalculateMainGame();
             GameDataManager.Instance.m_bonusSymbolCount = 3;
@@ -570,6 +605,7 @@ public class MainGameManager : MonoBehaviour
         }
         else if (InputManager.Instance.CheckKeyDown(GameKey.Bonus4))
         {
+            ResetValues();
             GameDataManager.Instance.ResetValues();
             CalculateMainGame();
             GameDataManager.Instance.m_bonusSymbolCount = 4;
@@ -578,6 +614,7 @@ public class MainGameManager : MonoBehaviour
         }
         else if (InputManager.Instance.CheckKeyDown(GameKey.Bonus5))
         {
+            ResetValues();
             GameDataManager.Instance.ResetValues();
             CalculateMainGame();
             GameDataManager.Instance.m_bonusSymbolCount = 5;
@@ -590,7 +627,7 @@ public class MainGameManager : MonoBehaviour
         m_mainGameState = MainGameState.Spin;
         ShowPulledSymbols();
         StartCoroutine(SwitchSpinStopButton(false));
-        m_reels.StartSpin();
+        m_reels.StartSpin(m_refBonus, m_refFree);
 
         CommonUIManager.Instance.StopIncresingMoneyTextAnim();
 

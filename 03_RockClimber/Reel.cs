@@ -10,13 +10,12 @@ public enum ReelState
 }
 public class Reel : MonoBehaviour
 {
-    public event Action onSpinEnd;
+    public event Action<int> onSpinEnd;
 
     public int[] m_randomReel;
     public Symbol[] m_symbols = new Symbol[5];
-    public Animator m_winEffectAnimator;
-    public Animator m_winFrameAnimator;
     public AudioClip m_reelStopSound;
+    public AudioClip m_winableReelSound;
 
     bool m_isWinable;
     bool m_isForcedToStop;
@@ -25,9 +24,9 @@ public class Reel : MonoBehaviour
     int m_randomReelNum;
     int m_switchCount;
     const float m_acceleration = 5000f;
-    const float m_deceleration = -5000f;
+    const float m_deceleration = -7000f;
     float m_currentMoveSpeed;
-    const float m_maxMoveSpeed= 4000f;
+    const float m_maxMoveSpeed= 5000f;
     const float m_dampingSpeed = 1500f;
     float m_spinStartTime;
     float m_spinTime;
@@ -97,7 +96,7 @@ public class Reel : MonoBehaviour
 
         return null;
     }
-    public void StartSpin(float spinTime)
+    public void StartSpin(float spinTime, bool winable)
     {
         if (m_reelState != ReelState.Idle) return;
 
@@ -108,6 +107,7 @@ public class Reel : MonoBehaviour
         m_reelState = ReelState.SpinStart;
         m_spinStartTime = Time.time;
         m_spinTime = spinTime;
+        m_isWinable = winable;
         m_spinStopCoroutine = StartCoroutine(BreakReelAfter(spinTime));
     }
     public void PauseGame()
@@ -144,6 +144,20 @@ public class Reel : MonoBehaviour
         {
             if(isOn) symbol.SetWinState();
             else symbol.SetIdleState();
+        }
+    }
+    public void SetWinableReelAnim()
+    {
+        if (m_reelState == ReelState.SpinStart ||
+            m_reelState == ReelState.SpinAccel ||
+            m_reelState == ReelState.Spin)
+        {
+            if(m_isWinable)
+            {
+                GameEffectManager.Instance.TurnWinableFrame(m_col, true, GetComponent<RectTransform>().anchoredPosition.x);
+
+                m_audiosource.PlayOneShot(m_winableReelSound);
+            }
         }
     }
     #endregion Public Method
@@ -336,7 +350,9 @@ public class Reel : MonoBehaviour
     }
     void UpdateOnStopState()
     {
-        if(m_col == 4) onSpinEnd();
+        if(m_col != 0) onSpinEnd(m_col);
+        foreach (Symbol symbol in m_symbols) symbol.CheckWinable(m_isForcedToStop);
+        GameEffectManager.Instance.TurnWinableFrame(m_col, false);
         m_reelState = ReelState.Idle;        
     }
     #endregion Private Method
