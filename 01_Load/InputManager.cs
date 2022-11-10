@@ -5,10 +5,10 @@ using UnityEngine;
 public enum GameKey
 {
     BetUp = 0, BetDown, Spin, Escape,
-    AllWilds, NoScatter, Free1, Free2, Free3, Bonus1, Bonus2, Bonus3, Bonus4, Bonus5,
+    AllWilds, FiveOfKind, Free1, Free2, Free3, Bonus1, Bonus2, Bonus3, Bonus4, Bonus5,
     Free20, Free15, Free10,
     Grandjackpot, Majorjackpot, Minorjacpot, Minijacpot,
-    AddMoney, SubtractMoney,
+    AddMoney, ResetMoney,
     TimeForSpecialBonus
 }
 
@@ -66,7 +66,7 @@ public class InputManager : MonoBehaviour
         m_myKeys.Add(GameKey.Spin, KeyCode.Space);
         m_myKeys.Add(GameKey.Escape, KeyCode.Escape);
         m_myKeys.Add(GameKey.AllWilds, KeyCode.Q);
-        m_myKeys.Add(GameKey.NoScatter, KeyCode.W);
+        m_myKeys.Add(GameKey.FiveOfKind, KeyCode.W);
         m_myKeys.Add(GameKey.Free1, KeyCode.E);
         m_myKeys.Add(GameKey.Free2, KeyCode.R);
         m_myKeys.Add(GameKey.Free3, KeyCode.T);
@@ -83,7 +83,7 @@ public class InputManager : MonoBehaviour
         m_myKeys.Add(GameKey.Minorjacpot, KeyCode.H);
         m_myKeys.Add(GameKey.Minijacpot, KeyCode.J);
         m_myKeys.Add(GameKey.AddMoney, KeyCode.K);
-        m_myKeys.Add(GameKey.SubtractMoney, KeyCode.L);
+        m_myKeys.Add(GameKey.ResetMoney, KeyCode.L);
         m_myKeys.Add(GameKey.TimeForSpecialBonus, KeyCode.Z);
     }
     #endregion Private Method

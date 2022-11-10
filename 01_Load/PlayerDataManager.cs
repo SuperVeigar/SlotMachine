@@ -75,6 +75,15 @@ public class PlayerDataManager : MonoBehaviour
         AddPlayerCurrentMoney(money);
         CommonUIManager.Instance.ApplyMyMoneyText();
     }
+    public void ResetPlayerCurrentMoneyAndChangeText()
+    {
+        if (m_playerData != null)
+        {
+            m_playerData.m_myCurrentMoney = m_startMoney;
+            SavePlayerData();
+        }
+        CommonUIManager.Instance.ApplyMyMoneyText();
+    }
     public void ResetSpecialBonusTime()
     {
         m_playerData.m_timeToCollectSpecialBonus = DateTime.Now.AddSeconds(m_secondsForNextSpecialBonus);
@@ -114,7 +123,7 @@ public class PlayerDataManager : MonoBehaviour
     void TestGame()
     {
         if (InputManager.Instance.CheckKeyDown(GameKey.AddMoney)) AddPlayerCurrentMoneyAndChangeText(100000);
-        else if (InputManager.Instance.CheckKeyDown(GameKey.SubtractMoney)) AddPlayerCurrentMoneyAndChangeText(-100000);
+        else if (InputManager.Instance.CheckKeyDown(GameKey.ResetMoney)) ResetPlayerCurrentMoneyAndChangeText();
     }
     public void SetSpecialBonusTime(int seconds)
     {

@@ -49,10 +49,6 @@ public class GameUIManager : MonoBehaviour
     {
         
     }
-    private void OnDestroy()
-    {
-        CommonUIManager.Instance.m_menuDropdown.onOpenHelpPanel -= OpenHelpPanel;
-    }
 
     #region Public Method
     public void UpdateTotalBetWindow()

@@ -60,7 +60,8 @@ public class LobbyManager : MonoBehaviour
     {
         SetActiveCollectSpecialBonus(false);
         CommonUIManager.Instance.AnimateIncreasingMyMoneyText(m_playerData.m_myCurrentMoney, m_playerData.m_myCurrentMoney + m_specialBonusMoneyAmount);
-        PlayerDataManager.Instance.AddPlayerCurrentMoney(m_specialBonusMoneyAmount);        
+        PlayerDataManager.Instance.AddPlayerCurrentMoney(m_specialBonusMoneyAmount);
+        CommonSoundManager.Instance.PlayCoinSound();
         PlayerDataManager.Instance.ResetSpecialBonusTime();
         m_audioSource.PlayOneShot(m_collectingCashSound);
         m_gatheringCoinsParticle.gameObject.SetActive(false);

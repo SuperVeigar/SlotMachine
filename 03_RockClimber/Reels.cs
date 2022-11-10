@@ -6,14 +6,17 @@ public class Reels : MonoBehaviour
 {
      
     public Reel[] m_reels = new Reel[5];
+    public AudioClip m_slotStartSound;
 
     const float m_reelSpinTime = 2f;
     const float m_reelStopInterval = 0.3f;
+    AudioSource m_audiosource;
     WinChecker m_winChecker;
 
     // Start is called before the first frame update
     void Start()
     {
+        m_audiosource = GetComponent<AudioSource>();
         m_winChecker = GetComponent<WinChecker>();
         SetRowCol();
         LoadRandomReels();
@@ -31,6 +34,7 @@ public class Reels : MonoBehaviour
     public void StartSpin()
     {
         m_winChecker.ResetValues();
+        m_audiosource.PlayOneShot(m_slotStartSound);
         for (int i = 0; i < m_reels.Length; i++)
         {
             m_reels[i].StartSpin(m_reelSpinTime + m_reelStopInterval * i);
@@ -95,4 +99,7 @@ public class Reels : MonoBehaviour
         m_winChecker.SetSymbols(symbols);
     }
     #endregion Private Method
+
+    #region Test
+    #endregion Test
 }

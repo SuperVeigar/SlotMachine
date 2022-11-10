@@ -31,6 +31,7 @@ public class MainGameManager : MonoBehaviour
     public Reels m_reels;
     public bool m_isPaused { get; private set; }
     public SymbolSort[,] m_pulledSymbols { get; private set; }
+    public FiveOfKind m_fiveOfKind;
 
     static MainGameManager m_instance;    
     bool m_isAutoSpin;
@@ -63,6 +64,7 @@ public class MainGameManager : MonoBehaviour
         ResetValues();
         CommonUIManager.Instance.m_menuDropdown.onOpenHelpPanel += PauseGame;
         CommonUIManager.Instance.m_menuDropdown.onCloseHelpPanel += ResumeGame;
+        m_fiveOfKind.onEndFiveOfKind += MoveToMainRewardFromFiveOfKind;
     }
 
     // Update is called once per frame
@@ -406,7 +408,7 @@ public class MainGameManager : MonoBehaviour
                 m_pulledSymbols[Random.Range(0, 3), i] = SymbolSort.Bonus;
             }
         }
-    }
+    }    
     IEnumerator SwitchSpinStopButton(bool isSpinButonOn)
     {
         yield return new WaitForSeconds(m_timeToSwitchStopButton);
@@ -427,15 +429,16 @@ public class MainGameManager : MonoBehaviour
     {
         if (GameDataManager.Instance.m_mainWin > 0)
         {
-            m_reels.TurnWinSymbolAnim(true);
-            GameUIManager.Instance.SetWinTextAndNum(GameDataManager.Instance.m_mainWin);
+            m_reels.TurnWinSymbolAnim(true);            
 
             if (GameDataManager.Instance.m_isFiveOfKinds)
             {
+                m_fiveOfKind.StartAnim();
                 m_mainGameState = MainGameState.FiveOfKinds;
             }
             else
             {
+                GameUIManager.Instance.SetWinTextAndNum(GameDataManager.Instance.m_mainWin);
                 m_mainGameState = MainGameState.MainReward;
             }
             
@@ -445,12 +448,16 @@ public class MainGameManager : MonoBehaviour
     }
     void OnFiveOfKindsState()
     {
-        Debug.Log("FiveOfKinds");
+            
+    }
+    void MoveToMainRewardFromFiveOfKind()
+    {
+        GameUIManager.Instance.SetWinTextAndNum(GameDataManager.Instance.m_mainWin);
         m_mainGameState = MainGameState.MainReward;
     }
     void OnMainRewardState()
     {
-        //m_mainGameState = MainGameState.MainEnd;
+        
     }
     void OnMainEndState()
     {
@@ -463,6 +470,7 @@ public class MainGameManager : MonoBehaviour
         if(GameDataManager.Instance.m_totalWin > 0)
         {
             CommonUIManager.Instance.AnimateIncreasingMyMoneyText(GameDataManager.Instance.m_myDisplayMoney, GameDataManager.Instance.m_myDisplayMoney + GameDataManager.Instance.m_totalWin);
+            GameSoundManager.Instance?.PlayWinCoinSound();
         }        
         m_mainGameState = MainGameState.TotalEnd;
     }
@@ -505,10 +513,11 @@ public class MainGameManager : MonoBehaviour
             }
             StartGameByTestKey();
         }
-        else if (InputManager.Instance.CheckKeyDown(GameKey.NoScatter))
+        else if (InputManager.Instance.CheckKeyDown(GameKey.FiveOfKind))
         {
             GameDataManager.Instance.ResetValues();
             CalculateMainGame();
+            SetFiveOfKind();
             StartGameByTestKey();
         }
         else if (InputManager.Instance.CheckKeyDown(GameKey.Free1))
@@ -588,6 +597,13 @@ public class MainGameManager : MonoBehaviour
         PlayerDataManager.Instance.AddPlayerCurrentMoneyAndChangeText(-1 * GameDataManager.Instance.m_totalBet);
 
         GameUIManager.Instance.SetGoodLuckText();
+    }
+    void SetFiveOfKind()
+    {
+        for(int col = 0; col < GameDataManager.Instance.GetSlotCol(); col++)
+        {
+            m_pulledSymbols[1, col] = SymbolSort.Wild;
+        }        
     }
     #endregion Test
 }
