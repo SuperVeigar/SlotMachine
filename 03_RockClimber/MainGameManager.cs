@@ -567,6 +567,7 @@ public class MainGameManager : MonoBehaviour
             {
                 GameEffectManager.Instance.TurnOnWinFrame(m_refBonus);                
             }
+            m_mainStateCoroutine = StartCoroutine(MoveToCheckBonus());
         }
                 
         m_mainGameState = MainGameState.ShowScatterWin;
@@ -576,7 +577,7 @@ public class MainGameManager : MonoBehaviour
         if (GameDataManager.Instance.m_freeSymbolCount == 3) m_mainGameState = MainGameState.TotalReward;
         else if (GameDataManager.Instance.m_bonusSymbolCount >= 3)
         {
-            m_mainStateCoroutine = StartCoroutine(MoveToCheckBonus());            
+                     
         }
         else m_mainGameState = MainGameState.TotalReward;
     }
@@ -584,8 +585,7 @@ public class MainGameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(m_timeToShowBonusWin);
 
-        GameSoundManager.Instance.TurnMainBGM(false);
-        GameSoundManager.Instance.TurnBonusBGM(true);
+        GameSoundManager.Instance.TurnMainBGM(false);        
         m_mainGameState = MainGameState.CheckBonus;
     }
     void OnCheckBonusState()
@@ -601,6 +601,7 @@ public class MainGameManager : MonoBehaviour
             !m_bonusGame.activeSelf)
         {
             m_bonusGame.SetActive(true);
+            GameSoundManager.Instance.TurnBonusBGM(true);
             GameEffectManager.Instance.TurnOffWinFrame();
         }
         if(GameEffectManager.Instance.IsEndBonusIntro())
