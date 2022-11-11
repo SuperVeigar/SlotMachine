@@ -52,7 +52,7 @@ public class GameDataManager : MonoBehaviour
     public int m_bonusSymbolCount;
     public int m_bonusGameTotalCount;
     public int m_bonusGameCurrentCount;
-    public long m_myDisplayMoney;
+    //public long m_myDisplayMoney;
 
     static GameDataManager m_instance;
     const int m_slotRow = 3;
@@ -87,7 +87,7 @@ public class GameDataManager : MonoBehaviour
         m_mainWin = 0;
         m_bonusWin = 0;
         m_freeWin = 0;
-        m_myDisplayMoney = PlayerDataManager.Instance.m_playerData.m_myCurrentMoney;
+        //m_myDisplayMoney = PlayerDataManager.Instance.m_playerData.m_myCurrentMoney;
         m_freeSymbolCount = 0;
         m_freeGameTotalCount = 0;
         m_freeGameCurrentCount = 0;
@@ -136,10 +136,6 @@ public class GameDataManager : MonoBehaviour
 
         return 0;
     }
-    public void SetDisplayMoney()
-    {
-
-    }
     public void AddMainWin(int winValue)
     {
         m_mainWin += (winValue * m_totalBet);
@@ -152,6 +148,13 @@ public class GameDataManager : MonoBehaviour
         {
             m_bet = m_maxBet;
         }
+        CalcTotalBet();
+        TotalBetChangeEvent();
+    }
+    public void SetBonusGameCount()
+    {
+        m_bonusGameTotalCount = m_bonusSymbolCount;
+        m_bonusGameCurrentCount = m_bonusGameTotalCount;
     }
     #endregion Public Method
 
@@ -214,6 +217,10 @@ public class GameDataManager : MonoBehaviour
         else if(bet > (int)BET._1) bet = (int)BET._1;
 
         m_bet = (BET)bet;
+        CalcTotalBet();
+    }
+    void CalcTotalBet()
+    {
         m_totalBet = m_totalBetRefDic[m_bet] * m_lines;
     }
     #endregion Private Method

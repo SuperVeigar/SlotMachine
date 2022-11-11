@@ -125,12 +125,12 @@ public class PlayerDataManager : MonoBehaviour
         if (InputManager.Instance.CheckKeyDown(GameKey.AddMoney))
         {
             AddPlayerCurrentMoneyAndChangeText(100000);
-            GameDataManager.Instance.UpdateMaxBet();
+            GameDataManager.Instance?.UpdateMaxBet();
         }
         else if (InputManager.Instance.CheckKeyDown(GameKey.ResetMoney))
         {            
             ResetPlayerCurrentMoneyAndChangeText();
-            GameDataManager.Instance.UpdateMaxBet();
+            GameDataManager.Instance?.UpdateMaxBet();
         }
     }
     public void SetSpecialBonusTime(int seconds)

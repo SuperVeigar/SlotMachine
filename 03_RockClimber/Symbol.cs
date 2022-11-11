@@ -22,7 +22,7 @@ public class Symbol : MonoBehaviour
     public SymbolSort m_symboleSort;
     public Image m_winFrame;
     public Image[] m_idleImageArray;
-    public Animator m_bonusWinAnim;
+    public GameObject m_bonusWinAnim;
     public Animator m_winEffect;
 
     int m_row;
@@ -70,7 +70,7 @@ public class Symbol : MonoBehaviour
         m_isWon = false;
         m_isDisplayingWin = false;
         m_winFrame.enabled = false;
-        m_bonusWinAnim.GetComponent<Image>().enabled = false;
+        m_bonusWinAnim.SetActive(false);
         m_winEffect.GetComponent<Image>().enabled = false;
     }
     public void SetIdleState()
@@ -78,16 +78,19 @@ public class Symbol : MonoBehaviour
         m_winFrame.enabled = false;
         m_winEffect.GetComponent<Image>().enabled = false;
     }
-    public void SetWinableState()
-    {
-
-    }
     public void SetWinState()
     {
         if (!m_isWon) return;
 
         m_winFrame.enabled = true;
         m_winEffect.GetComponent<Image>().enabled = true;
+    }
+    public void SetBonusWinAnim(bool isOn)
+    {
+       if(m_symboleSort == SymbolSort.Bonus)
+        {
+            m_bonusWinAnim.SetActive(isOn);
+        }
     }
     public void CheckWinable(bool isForcedToStop)
     {

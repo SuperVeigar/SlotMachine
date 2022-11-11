@@ -97,6 +97,13 @@ public class Reels : MonoBehaviour
             m_reels[i].TurnWinSymbolAnim(isOn);
         }
     }
+    public void TurnBonusWinSymbolAnim(bool isOn)
+    {
+        for (int i = 0; i < m_reels.Length; i++)
+        {
+            m_reels[i].TurnBonusWinSymbolAnim(isOn);
+        }
+    }
     #endregion Public Method
 
     #region Private Method

@@ -20,6 +20,7 @@ public class CommonUIManager : MonoBehaviour
         }
     }
 
+    public float m_timeIncreasingMoney { get; private set; }
     public Button m_homeBtn;
     public Button m_shopBtn;
     public Button m_friendsBtn;
@@ -36,7 +37,6 @@ public class CommonUIManager : MonoBehaviour
     long m_startMoneyToAnimate;
     long m_targetMoneyToAnimate;
     long m_currentMoneyToAnimate;
-    const float m_timeIncreasingMoney = 1.25f;
 
     private void Awake()
     {
@@ -45,6 +45,8 @@ public class CommonUIManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        m_timeIncreasingMoney = 1.25f;
+
         DontDestroyOnLoad(gameObject);
         DontDestroyOnLoad(m_CommonUICanvas.gameObject);        
     }

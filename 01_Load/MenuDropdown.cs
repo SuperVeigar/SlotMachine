@@ -10,7 +10,7 @@ public class MenuDropdown : MonoBehaviour
     public event Action onCloseHelpPanel;
 
     public enum MenuDropdownState { Open = 0, Close }
-    public Button m_helpBtn;
+    public Button m_paytableBtn;
     public Button m_myInfoBtn; 
     public Button m_settingBtn;
     public Button m_aboutBtn; 
@@ -59,7 +59,7 @@ public class MenuDropdown : MonoBehaviour
     public void SetLobbyState()
     {
         gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(m_menuWidth, m_buttonHeight * m_lobbyMenuCount);
-        m_helpBtn.gameObject.SetActive(false);
+        m_paytableBtn.gameObject.SetActive(false);
         m_myInfoBtn.gameObject.SetActive(true);
         m_settingBtn.gameObject.SetActive(true);
         m_aboutBtn.gameObject.SetActive(true);
@@ -75,13 +75,13 @@ public class MenuDropdown : MonoBehaviour
         float menuHeight = m_buttonHeight * m_gameMenuCount;
 
         gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(m_menuWidth, menuHeight);
-        m_helpBtn.gameObject.SetActive(true);
+        m_paytableBtn.gameObject.SetActive(true);
         m_myInfoBtn.gameObject.SetActive(true);
         m_settingBtn.gameObject.SetActive(true);
         m_aboutBtn.gameObject.SetActive(true);
         m_supportBtn.gameObject.SetActive(true);
 
-        m_helpBtn.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 160f);
+        m_paytableBtn.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 160f);
         m_myInfoBtn.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 80f);
         m_settingBtn.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0f);
         m_aboutBtn.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -80f);
@@ -105,7 +105,7 @@ public class MenuDropdown : MonoBehaviour
     #region Private Method
     void InitValues()
     {
-        m_buttonHeight = m_helpBtn.GetComponent<RectTransform>().sizeDelta.y;
+        m_buttonHeight = m_paytableBtn.GetComponent<RectTransform>().sizeDelta.y;
         m_animator = GetComponent<Animator>();
 
         ResetMenu();

@@ -147,6 +147,13 @@ public class Reel : MonoBehaviour
             else symbol.SetIdleState();
         }
     }
+    public void TurnBonusWinSymbolAnim(bool isOn)
+    {
+        foreach (Symbol symbol in m_symbols)
+        {
+            symbol.SetBonusWinAnim(isOn);
+        }
+    }
     public void SetWinableReelAnim()
     {
         if (m_reelState == ReelState.SpinStart ||

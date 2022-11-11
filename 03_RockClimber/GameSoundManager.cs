@@ -17,6 +17,9 @@ public class GameSoundManager : MonoBehaviour
     }    
 
     public AudioClip m_winCoinSound;
+    public AudioClip m_bonusStartSiren;
+    public GameObject m_mainBGM;
+    public GameObject m_bonusBGM;
 
     static GameSoundManager m_instance;
     AudioSource m_audioSource;
@@ -37,6 +40,20 @@ public class GameSoundManager : MonoBehaviour
     public void PlayWinCoinSound()
     {
         m_audioSource.PlayOneShot(m_winCoinSound);
+    }
+    public void PlayBonusStartSiren()
+    {
+        m_audioSource.PlayOneShot(m_bonusStartSiren);
+    }
+    public void TurnMainBGM(bool on)
+    {
+        if(on) m_mainBGM.GetComponent<AudioSource>().Play();
+        else m_mainBGM.GetComponent<AudioSource>().Pause();
+    }
+    public void TurnBonusBGM(bool on)
+    {
+        if (on) m_bonusBGM.GetComponent<AudioSource>().Play();
+        else m_bonusBGM.GetComponent<AudioSource>().Stop();
     }
     #endregion Public Method
 
