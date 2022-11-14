@@ -138,8 +138,17 @@ public class GameDataManager : MonoBehaviour
     }
     public void AddMainWin(int winValue)
     {
-        m_mainWin += (winValue * m_totalBet);
-        m_totalWin += (winValue * m_totalBet);
+        int win = winValue * m_totalBet;
+        m_mainWin += win;
+        m_totalWin += win;
+    }
+    public int AddBonusWin(int winValue)
+    {
+        int win = winValue * m_totalBetRefDic[m_bet];
+        m_bonusWin += win;
+        m_totalWin += win;
+
+        return win;
     }
     public void UpdateMaxBet()
     {
@@ -154,7 +163,7 @@ public class GameDataManager : MonoBehaviour
     public void SetBonusGameCount()
     {
         m_bonusGameTotalCount = m_bonusSymbolCount;
-        m_bonusGameCurrentCount = m_bonusGameTotalCount;
+        m_bonusGameCurrentCount = 0;
     }
     #endregion Public Method
 

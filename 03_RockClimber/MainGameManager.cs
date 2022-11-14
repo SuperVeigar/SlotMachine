@@ -38,15 +38,15 @@ public class MainGameManager : MonoBehaviour
     static MainGameManager m_instance;    
     bool m_isAutoSpin;
     MainGameState m_mainGameState;    
-    const int m_probability_1Free = 10;
+    const int m_probability_1Free = 13;
     const int m_probability_2Free = m_probability_1Free+ 7;
-    const int m_probability_3Free = m_probability_2Free + 5;
-    const int m_probability_1Bonus = m_probability_3Free + 15;
-    const int m_probability_2Bonus = m_probability_1Bonus + 13;
-    const int m_probability_3Bonus = m_probability_2Bonus + 10;
-    const int m_probability_4Bonus = m_probability_3Bonus + 7;
-    const int m_probability_5Bonus = m_probability_4Bonus + 5;
-    const int m_probability_Main = m_probability_5Bonus + 28;
+    const int m_probability_3Free = m_probability_2Free + 2;
+    const int m_probability_1Bonus = m_probability_3Free + 18;
+    const int m_probability_2Bonus = m_probability_1Bonus + 17;
+    const int m_probability_3Bonus = m_probability_2Bonus + 5;
+    const int m_probability_4Bonus = m_probability_3Bonus + 3;
+    const int m_probability_5Bonus = m_probability_4Bonus + 2;
+    const int m_probability_Main = m_probability_5Bonus + 33;
     const int m_probability_Wild = 5;
     const int m_probability_BigFoot = m_probability_Wild + 5;
     const int m_probability_Climber = m_probability_BigFoot + 8;
@@ -60,7 +60,9 @@ public class MainGameManager : MonoBehaviour
     int[] m_refFree;
     const float m_timeToActAutoSpin = 2f;
     const float m_timeToSwitchStopButton = 0.5f;
-    const float m_timeToShowBonusWin = 2f;
+    const float m_delayTimeToBonusIntroWithMainWin = 2.5f;
+    const float m_delayTimeToBonusIntroWithNothing = 0.15f;
+    const float m_timeToShowBonusWin = 3f;    
     Coroutine m_mainStateCoroutine;
 
     void Start()
@@ -509,33 +511,17 @@ public class MainGameManager : MonoBehaviour
             PlayerDataManager.Instance.AddPlayerCurrentMoney(GameDataManager.Instance.m_mainWin);
         }
 
-        if(IsBonusOrFreeOnNext())
-        {
-            m_mainStateCoroutine = StartCoroutine(MoveToShowScatterWinFromMainEnd());
-        }
-
         m_mainGameState = MainGameState.MainEnd;
     }
-    IEnumerator MoveToShowScatterWinFromMainEnd()
-    {
-        yield return new WaitForSeconds(CommonUIManager.Instance.m_timeIncreasingMoney + 0.5f);
-
-        SetMainGameStateWithShowScatterWin();
-    }
-    bool IsBonusOrFreeOnNext()
-    {
-        if (GameDataManager.Instance.m_freeSymbolCount == 3 ||
-            GameDataManager.Instance.m_bonusSymbolCount >= 3) return true;
-
-        return false;
-    }
+    
     void OnMainEndState()
     {
         if (IsBonusOrFreeOnNext())
         {
             if(m_mainStateCoroutine == null)
             {
-                SetMainGameStateWithShowScatterWin();
+                if(GameDataManager.Instance.m_mainWin > 0) m_mainStateCoroutine = StartCoroutine(MoveToShowScatterWinFromMainEnd(m_delayTimeToBonusIntroWithMainWin));
+                else m_mainStateCoroutine = StartCoroutine(MoveToShowScatterWinFromMainEnd(m_delayTimeToBonusIntroWithNothing));
             }
             else
             {
@@ -550,7 +536,20 @@ public class MainGameManager : MonoBehaviour
             
         } 
         else m_mainGameState = MainGameState.TotalReward;
-    }    
+    }
+    IEnumerator MoveToShowScatterWinFromMainEnd(float delayTime)
+    {
+        yield return new WaitForSeconds(delayTime);
+
+        SetMainGameStateWithShowScatterWin();
+    }
+    bool IsBonusOrFreeOnNext()
+    {
+        if (GameDataManager.Instance.m_freeSymbolCount == 3 ||
+            GameDataManager.Instance.m_bonusSymbolCount >= 3) return true;
+
+        return false;
+    }
     void SetMainGameStateWithShowScatterWin()
     {
         m_reels.TurnWinSymbolAnim(false);
@@ -592,7 +591,7 @@ public class MainGameManager : MonoBehaviour
     {
         GameDataManager.Instance.SetBonusGameCount();
         BonusGameManager.Instance.CalculateGame();
-        GameEffectManager.Instance.AnimateBonusInro();
+        GameEffectManager.Instance.AnimateBonusInro(GameDataManager.Instance.m_bonusGameTotalCount);
         m_mainGameState = MainGameState.BonusIntro;
     }
     void OnBonusIntroState()

@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class Gem : MonoBehaviour
 {
+    public Text m_winNumber;
     public Sprite[] m_idleImageArray;
     public GameObject m_breakingImage;
     public GameObject m_GlowParticle;
@@ -32,11 +33,12 @@ public class Gem : MonoBehaviour
         m_breakingImage?.SetActive(false);
         m_GlowParticle?.SetActive(true);
     }
-    public void BreakGem()
+    public void BreakGem(int winNumber)
     {
         GetComponent<Image>().enabled = false;
         m_breakingImage?.SetActive(true);
         m_GlowParticle?.SetActive(false);
+        m_winNumber.text = "+ " + string.Format("{0:#,###}", winNumber);
     }
     #endregion Public Method
 
