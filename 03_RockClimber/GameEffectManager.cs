@@ -30,6 +30,7 @@ public class GameEffectManager : MonoBehaviour
     public GameObject[] m_blackFrame;
     public GameObject m_megaWin;
     public GameObject m_collectButton;
+    public MegaWinCoin[] m_megaWinCoins;
 
     static GameEffectManager m_instance;
     int m_winableFrameCol;
@@ -46,7 +47,7 @@ public class GameEffectManager : MonoBehaviour
     void Start()
     {
         m_winableFrame.SetActive(false);
-        m_megaWin.SetActive(false);
+        m_megaWin.SetActive(false);       
     }
 
     // Update is called once per frame
@@ -125,6 +126,7 @@ public class GameEffectManager : MonoBehaviour
     public void TurnOnMegaWin(int win)
     {
         m_megaWin.SetActive(true);
+        ResetCoins();        
         m_collectButton.SetActive(false);
         m_targetMegaWin = win;
         StartCoroutine(TurnOnCollectBtn());
@@ -174,12 +176,23 @@ public class GameEffectManager : MonoBehaviour
 
             yield return new WaitForSeconds(m_deltaTimeIncreasingMegaWin);
         }
-    }IEnumerator DelayForTurnOffMegaWin()
+    }
+    IEnumerator DelayForTurnOffMegaWin()
     {
         yield return new WaitForSeconds(1.5f);
 
         TurnOffMegaWin();
         onCollectMegaWin();
+    }
+    void ResetCoins()
+    {
+        if (m_megaWinCoins.Length == 0)
+        {
+            //m_megaWinCoins = new MegaWinCoin[31];
+            m_megaWinCoins = FindObjectsOfType<MegaWinCoin>();
+        }        
+
+        foreach (MegaWinCoin coin in m_megaWinCoins) coin.ResetCoin();
     }
     #endregion Private Method
 }
