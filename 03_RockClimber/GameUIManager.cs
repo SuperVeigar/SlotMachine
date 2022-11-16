@@ -29,7 +29,7 @@ public class GameUIManager : MonoBehaviour
     public Button m_betUpButton;
     public Button m_betDownButton;
     public Image m_winBoxBG;
-    public GameObject m_helpPanel;
+    public GameObject m_paytablePanel;
 
     static GameUIManager m_instance;
 
@@ -79,7 +79,7 @@ public class GameUIManager : MonoBehaviour
     public void CloseHelpPanel()
     {
         CommonUIManager.Instance.m_menuDropdown.CloseHelpPanel();
-        m_helpPanel.SetActive(false);
+        m_paytablePanel.SetActive(false);
         CommonUIManager.Instance.SetActiveAllButtons(true);
         SetActiveAllButtons(true);
         CommonSoundManager.Instance.m_isSoundable = true;        
@@ -119,7 +119,8 @@ public class GameUIManager : MonoBehaviour
     }
     void OpenHelpPanel()
     {
-        m_helpPanel.SetActive(true);
+        m_paytablePanel.GetComponent<PaytablePanel>().ResetValues();
+        m_paytablePanel.SetActive(true);
         CommonUIManager.Instance.SetActiveAllButtons(false);
         SetActiveAllButtons(false);
         CommonSoundManager.Instance.m_isSoundable = false;

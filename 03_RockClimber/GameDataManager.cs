@@ -41,6 +41,7 @@ public class GameDataManager : MonoBehaviour
     }
 
     public bool m_isFiveOfKinds;
+    public bool m_isMegaWin { get; private set; }
     public int m_totalBet { get; private set; }
     public int m_totalWin;
     public int m_mainWin;
@@ -61,6 +62,7 @@ public class GameDataManager : MonoBehaviour
     const int m_basicBetFactor = 100;
     const int m_lines = 50;
     const int m_mainGameSymbolCount = 9;
+    const int m_megawinFactor = 2000;
     BET m_maxBet;
     BET m_bet;
     Dictionary<BET, int> m_totalBetRefDic;
@@ -83,6 +85,7 @@ public class GameDataManager : MonoBehaviour
     public void ResetValues()
     {
         m_isFiveOfKinds = false;
+        m_isMegaWin = false;
         m_totalWin = 0;
         m_mainWin = 0;
         m_bonusWin = 0;
@@ -141,12 +144,14 @@ public class GameDataManager : MonoBehaviour
         int win = winValue * m_totalBet;
         m_mainWin += win;
         m_totalWin += win;
+        CheckMegaWin();
     }
     public int AddBonusWin(int winValue)
     {
         int win = winValue * m_totalBetRefDic[m_bet];
         m_bonusWin += win;
         m_totalWin += win;
+        CheckMegaWin();
 
         return win;
     }
@@ -231,6 +236,11 @@ public class GameDataManager : MonoBehaviour
     void CalcTotalBet()
     {
         m_totalBet = m_totalBetRefDic[m_bet] * m_lines;
+    }
+    void CheckMegaWin()
+    {
+        Debug.Log("mega win ? " + m_totalWin / m_totalBetRefDic[m_bet]);
+        if (m_totalWin >= m_totalBetRefDic[m_bet] * m_megawinFactor) m_isMegaWin = true;
     }
     #endregion Private Method
 }

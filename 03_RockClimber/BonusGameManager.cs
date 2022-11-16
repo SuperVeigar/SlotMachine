@@ -7,8 +7,8 @@ using UnityEngine.UI;
 public class BonusGameManager : MonoBehaviour
 {
     public event Action onBonusGameEnd;
-    enum BonusGameState { Ready = 0, Choice, Reward, CheckMore, TotalAward, End }
-    enum Jackpot { Mini = 0, Minor, Major, Grand, X70, X40, X20 }
+    enum BonusGameState { Intro = 0,Ready, Choice, Reward, CheckMore, TotalAward, End }
+    enum Jackpot { Mini = 0, Minor, Major, Grand, X300, X200, X100 }
     static public BonusGameManager Instance
     {
         get
@@ -23,19 +23,29 @@ public class BonusGameManager : MonoBehaviour
 
     public Text m_bonusGameCount;
     public Text m_bonusWinNumber;
+    public Text m_resultWinNumber;
+    public Image m_choiceTimeBar;
     public Gem[] m_gems;
     public AudioClip m_breakingGemSound_1;
     public AudioClip m_breakingGemSound_2;
+    public GameObject m_resultPanel;
 
     static BonusGameManager m_instance;
-    int m_choicCount;
     const int m_jackpotCount = 10;
+    bool m_isPlay;
     bool m_isAnimatingMoneyText;
     long m_increasingAmount;
     long m_targetMoneyToAnimate;
     long m_currentMoneyToAnimate;
+    int m_amountIncreasingResult;
+    int m_currentResultMoneyToAnimate;
+    int[] m_choosedGem;
     const float m_timeIncreasingMoney = 1.25f;
     const float m_delayToReward = 0.8f;
+    const float m_timeAnimatingResult = 8f;
+    const float m_timeIncreasingResultMoney = 4f;
+    const float m_timeToPick = 3f;
+    float m_elapsedTimeToPick;
     Jackpot[] m_jackpots;
     BonusGameState m_bonusGameState;
     AudioSource m_audioSource;
@@ -49,9 +59,15 @@ public class BonusGameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!m_isPlay) return;
+
         switch(m_bonusGameState)
         {
+            case BonusGameState.Intro:
+                OnIntroState();
+                break;
             case BonusGameState.Ready:
+                OnReadyState();
                 break;
             case BonusGameState.Choice:
                 break;
@@ -84,12 +100,14 @@ public class BonusGameManager : MonoBehaviour
     {
         if (arrayNum >= m_gems.Length ||
             m_bonusGameState != BonusGameState.Ready) return;
-                
+
+        m_choosedGem[GameDataManager.Instance.m_bonusGameCurrentCount] = arrayNum;
         int winValue = GetJackpot(m_jackpots[GameDataManager.Instance.m_bonusGameCurrentCount++]);
         int winNumber = GameDataManager.Instance.AddBonusWin(winValue);        
         m_bonusGameCount.text = (GameDataManager.Instance.m_bonusGameTotalCount - GameDataManager.Instance.m_bonusGameCurrentCount).ToString();        
         PlayBreakingGemSound();
         m_gems[arrayNum].BreakGem(winNumber);
+        m_elapsedTimeToPick = m_timeToPick;
 
         m_bonusGameState = BonusGameState.Choice;
 
@@ -99,22 +117,30 @@ public class BonusGameManager : MonoBehaviour
 
     #region Private Method
     void InitValues()
-    {
+    {        
         m_audioSource = GetComponent<AudioSource>();
-        m_jackpots = new Jackpot[m_jackpotCount] { Jackpot.Mini, Jackpot.Minor, Jackpot.Major, Jackpot.Grand, Jackpot.X70, Jackpot.X40, Jackpot.X40, Jackpot.X20, Jackpot.X20, Jackpot.X20 };
+        m_jackpots = new Jackpot[m_jackpotCount] { Jackpot.Mini, Jackpot.Minor, Jackpot.Major, Jackpot.Grand, Jackpot.X300, Jackpot.X200, Jackpot.X200, Jackpot.X100, Jackpot.X100, Jackpot.X100 };
+        m_choosedGem = new int[5];
+        
         ResetValues();
+
+        m_isPlay = false;
     }
     void ResetValues()
     {
         foreach (Gem gem in m_gems) gem?.ResetValues();
+        for (int i = 0; i < m_choosedGem.Length; i++) m_choosedGem[i] = -1;
         m_bonusGameCount.text = GameDataManager.Instance.m_bonusGameTotalCount.ToString();
-        m_choicCount = 0;
+        m_isPlay = true;
         m_isAnimatingMoneyText = false;
         m_increasingAmount = 0;
         m_targetMoneyToAnimate = 0;
         m_currentMoneyToAnimate = 0;
+        m_currentResultMoneyToAnimate = 0;
+        m_elapsedTimeToPick = m_timeToPick;
         m_bonusWinNumber.text = "0";
-        m_bonusGameState = BonusGameState.Ready;
+        m_resultPanel.SetActive(false);
+        m_bonusGameState = BonusGameState.Intro;
     }
     void ShuffleJackpot(int count)
     {
@@ -125,6 +151,35 @@ public class BonusGameManager : MonoBehaviour
             Jackpot tempJackpot = m_jackpots[rand1];
             m_jackpots[rand1] = m_jackpots[rand2];
             m_jackpots[rand2] = tempJackpot;
+        }
+    }
+    void OnIntroState()
+    {
+        if (GameEffectManager.Instance.IsEndBonusIntro()) m_bonusGameState = BonusGameState.Ready;
+    }
+    void OnReadyState()
+    {
+        UpdateTimeToPick();
+        TestKey();
+    }
+    void UpdateTimeToPick()
+    {
+        m_elapsedTimeToPick -= Time.deltaTime;
+        m_choiceTimeBar.fillAmount = m_elapsedTimeToPick / m_timeToPick;
+        if (m_elapsedTimeToPick <= 0)
+        {
+            int rand;
+            while(true)
+            {
+                rand = UnityEngine.Random.Range(0, m_gems.Length);
+
+                bool isNew = true;
+
+                foreach(int i in m_choosedGem) if(rand == i ) isNew = false;
+
+                if (isNew) break;
+            }
+            ChoiceGem(rand);
         }
     }
     IEnumerator MoveToReward()
@@ -145,10 +200,16 @@ public class BonusGameManager : MonoBehaviour
     {
         m_bonusGameState = BonusGameState.CheckMore;
 
-        yield return new WaitForSeconds(m_timeIncreasingMoney);
-
-        if (GameDataManager.Instance.m_bonusGameCurrentCount >= GameDataManager.Instance.m_bonusGameTotalCount) m_bonusGameState = BonusGameState.TotalAward;
-        else m_bonusGameState = BonusGameState.Ready;
+        if (GameDataManager.Instance.m_bonusGameCurrentCount >= GameDataManager.Instance.m_bonusGameTotalCount)
+        {
+            yield return new WaitForSeconds(m_timeIncreasingMoney + 1f);
+            StartCoroutine(MoveToEndFromTotalAward());
+        }
+        else
+        {
+            yield return new WaitForSeconds(m_timeIncreasingMoney);
+            m_bonusGameState = BonusGameState.Ready;
+        }
     }
     void OnCheckMoreState()
     {
@@ -156,32 +217,53 @@ public class BonusGameManager : MonoBehaviour
     }
     void OnTotalAward()
     {
-        StartCoroutine(MoveToEndFromTotalAward());        
+            
     }
     IEnumerator MoveToEndFromTotalAward()
     {
-        yield return new WaitForSeconds(4f);
+        GameSoundManager.Instance.TurnBonusBGM(false);
+        m_resultPanel.SetActive(true);        
+        StartCoroutine(UpdateResultNum());
+        m_bonusGameState = BonusGameState.TotalAward;
+
+        yield return new WaitForSeconds(m_timeAnimatingResult);
+
+        m_isPlay = false;
         onBonusGameEnd();
         m_bonusGameState = BonusGameState.End;
+    }
+    IEnumerator UpdateResultNum()
+    {
+        m_amountIncreasingResult = (int)(GameDataManager.Instance.m_bonusWin / (m_timeIncreasingResultMoney) * Time.deltaTime);
+
+        while(m_currentResultMoneyToAnimate < GameDataManager.Instance.m_bonusWin)
+        {
+            yield return null;
+            m_currentResultMoneyToAnimate += m_amountIncreasingResult;
+
+            if(m_currentResultMoneyToAnimate > GameDataManager.Instance.m_bonusWin) m_currentResultMoneyToAnimate = GameDataManager.Instance.m_bonusWin;
+
+            m_resultWinNumber.text = string.Format("{0:#,###}", m_currentResultMoneyToAnimate);
+        }
     }
     int GetJackpot(Jackpot jackpot)
     {
         switch(jackpot)
         {
-            case Jackpot.X20:
-                return 20;
-            case Jackpot.X40:
-                return 40;
-            case Jackpot.X70:
-                return 70;
-            case Jackpot.Mini:
+            case Jackpot.X100:
                 return 100;
-            case Jackpot.Minor:
+            case Jackpot.X200:
                 return 200;
-            case Jackpot.Major:
+            case Jackpot.X300:
+                return 300;
+            case Jackpot.Mini:
                 return 500;
-            case Jackpot.Grand:
+            case Jackpot.Minor:
                 return 1000;
+            case Jackpot.Major:
+                return 3000;
+            case Jackpot.Grand:
+                return 5000;
             default:
                 return 0;
         }
@@ -212,4 +294,14 @@ public class BonusGameManager : MonoBehaviour
         else m_audioSource.PlayOneShot(m_breakingGemSound_2);
     }
     #endregion Private Method
+
+    #region Test Method
+    void TestKey()
+    {
+        if (InputManager.Instance.CheckKeyDown(GameKey.BigBonus))
+        {
+            m_jackpots = new Jackpot[m_jackpotCount] { Jackpot.Grand, Jackpot.Minor, Jackpot.Major, Jackpot.Mini, Jackpot.X300, Jackpot.X200, Jackpot.X200, Jackpot.X100, Jackpot.X100, Jackpot.X100 };
+        }
+    }
+    #endregion  Test Method
 }

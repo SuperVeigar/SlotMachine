@@ -62,7 +62,8 @@ public class MainGameManager : MonoBehaviour
     const float m_timeToSwitchStopButton = 0.5f;
     const float m_delayTimeToBonusIntroWithMainWin = 2.5f;
     const float m_delayTimeToBonusIntroWithNothing = 0.15f;
-    const float m_timeToShowBonusWin = 3f;    
+    const float m_timeToShowBonusWin = 3f;
+    const float m_timeAnimatingMegaWin = 14.5f;
     Coroutine m_mainStateCoroutine;
 
     void Start()
@@ -75,6 +76,7 @@ public class MainGameManager : MonoBehaviour
         CommonUIManager.Instance.m_menuDropdown.onCloseHelpPanel += ResumeGame;
         m_fiveOfKind.onEndFiveOfKind += MoveToMainRewardFromFiveOfKind;
         BonusGameManager.Instance.onBonusGameEnd += MoveBonusOutroFromBonusGame;
+        GameEffectManager.Instance.onCollectMegaWin += MoveToTotalRewardWithCollect;
     }
 
     // Update is called once per frame
@@ -485,8 +487,7 @@ public class MainGameManager : MonoBehaviour
                 m_mainGameState = MainGameState.FiveOfKinds;
             }
             else
-            {
-                GameUIManager.Instance.SetWinTextAndNum(GameDataManager.Instance.m_mainWin);
+            {                
                 m_mainGameState = MainGameState.MainReward;
             }
         }
@@ -498,22 +499,31 @@ public class MainGameManager : MonoBehaviour
     }
     void MoveToMainRewardFromFiveOfKind()
     {
-        GameUIManager.Instance.SetWinTextAndNum(GameDataManager.Instance.m_mainWin);
         m_mainGameState = MainGameState.MainReward;
     }
     void OnMainRewardState()
     {
-        if (GameDataManager.Instance.m_mainWin > 0)
+        ApplyWin(GameDataManager.Instance.m_mainWin);
+        if(GameDataManager.Instance.m_mainWin > 0)
         {
-            CommonUIManager.Instance.AnimateIncreasingMyMoneyText(PlayerDataManager.Instance.m_playerData.m_myCurrentMoney, PlayerDataManager.Instance.m_playerData.m_myCurrentMoney + GameDataManager.Instance.m_mainWin);
-            GameSoundManager.Instance?.PlayWinCoinSound();
-
-            PlayerDataManager.Instance.AddPlayerCurrentMoney(GameDataManager.Instance.m_mainWin);
+            if (IsBonusOrFreeOnNext() || !GameDataManager.Instance.m_isMegaWin) GameSoundManager.Instance?.PlayWinCoinSound();
         }
-
+            
+        
         m_mainGameState = MainGameState.MainEnd;
     }
-    
+    void ApplyWin(int win)
+    {
+        if (win <= 0) return;
+
+        // 당첨금 데이터 적용
+        GameUIManager.Instance.SetWinTextAndNum(win);
+        PlayerDataManager.Instance.AddPlayerCurrentMoney(win);
+
+        // 애니메이션 시작
+        CommonUIManager.Instance.AnimateIncreasingMyMoneyText(PlayerDataManager.Instance.m_playerData.m_myCurrentMoney, PlayerDataManager.Instance.m_playerData.m_myCurrentMoney + win);
+
+    }
     void OnMainEndState()
     {
         if (IsBonusOrFreeOnNext())
@@ -535,7 +545,7 @@ public class MainGameManager : MonoBehaviour
             }
             
         } 
-        else m_mainGameState = MainGameState.TotalReward;
+        else m_mainStateCoroutine = StartCoroutine(MoveToTotalReward());
     }
     IEnumerator MoveToShowScatterWinFromMainEnd(float delayTime)
     {
@@ -573,12 +583,12 @@ public class MainGameManager : MonoBehaviour
     }
     void OnShowScatterWinState()
     {
-        if (GameDataManager.Instance.m_freeSymbolCount == 3) m_mainGameState = MainGameState.TotalReward;
+        if (GameDataManager.Instance.m_freeSymbolCount == 3) m_mainStateCoroutine = StartCoroutine(MoveToTotalReward());
         else if (GameDataManager.Instance.m_bonusSymbolCount >= 3)
         {
                      
         }
-        else m_mainGameState = MainGameState.TotalReward;
+        else m_mainStateCoroutine = StartCoroutine(MoveToTotalReward());
     }
     IEnumerator MoveToCheckBonus()
     {
@@ -622,26 +632,56 @@ public class MainGameManager : MonoBehaviour
         }
     }
     void OnBonusOutroState()
-    {
-        GameSoundManager.Instance.TurnMainBGM(true);
-        GameSoundManager.Instance.TurnBonusBGM(false);
+    {        
         m_bonusGame.SetActive(false);
         m_mainGameState = MainGameState.BonusEnd;
     }
     void OnBonusEndState()
     {
+        ApplyWin(GameDataManager.Instance.m_bonusWin);
+        if (!GameDataManager.Instance.m_isMegaWin)
+        {
+            GameSoundManager.Instance?.PlayWinCoinSound();
+            GameSoundManager.Instance.TurnMainBGM(true);
+        }
+
+            m_mainStateCoroutine = StartCoroutine(MoveToTotalReward());
+    }
+    IEnumerator MoveToTotalReward()
+    {
         m_mainGameState = MainGameState.TotalReward;
+
+        if (GameDataManager.Instance.m_isMegaWin)
+        {
+            GameSoundManager.Instance.TurnMainBGM(false);
+            GameEffectManager.Instance.TurnOnMegaWin(GameDataManager.Instance.m_totalWin);
+            yield return new WaitForSeconds(m_timeAnimatingMegaWin);
+            GameEffectManager.Instance.TurnOffMegaWin();
+            GameSoundManager.Instance.TurnMainBGM(true);
+        }
+        else yield return null;
+
+        m_mainGameState = MainGameState.TotalEnd;
+    }
+    void MoveToTotalRewardWithCollect()
+    {
+        if(m_mainStateCoroutine != null) StopCoroutine(m_mainStateCoroutine);
+        m_mainStateCoroutine = null;
+        GameEffectManager.Instance.TurnOffMegaWin();
+        GameSoundManager.Instance.TurnMainBGM(true);
+
+        m_mainGameState = MainGameState.TotalEnd;
     }
     void OnTotalRewardState()
-    {
-        if(GameDataManager.Instance.m_totalWin > 0)
-        {            
-            GameDataManager.Instance.UpdateMaxBet();
-        }        
-        m_mainGameState = MainGameState.TotalEnd;
+    {               
+        
     }
     void OnTotalEndState()
     {
+        if (GameDataManager.Instance.m_totalWin > 0)
+        {
+            GameDataManager.Instance.UpdateMaxBet();
+        }
         m_mainGameState = MainGameState.Ready;
     }
     #endregion Private Method

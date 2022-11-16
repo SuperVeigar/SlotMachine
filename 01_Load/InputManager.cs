@@ -7,7 +7,7 @@ public enum GameKey
     BetUp = 0, BetDown, Spin, Escape,
     AllWilds, FiveOfKind, Free1, Free2, Free3, Bonus1, Bonus2, Bonus3, Bonus4, Bonus5,
     Free20, Free15, Free10,
-    Grandjackpot, Majorjackpot, Minorjacpot, Minijacpot,
+    BigBonus, None_1, None_2, None_3,
     AddMoney, ResetMoney,
     TimeForSpecialBonus
 }
@@ -78,10 +78,10 @@ public class InputManager : MonoBehaviour
         m_myKeys.Add(GameKey.Free20, KeyCode.A);
         m_myKeys.Add(GameKey.Free15, KeyCode.S);
         m_myKeys.Add(GameKey.Free10, KeyCode.D);
-        m_myKeys.Add(GameKey.Grandjackpot, KeyCode.F);
-        m_myKeys.Add(GameKey.Majorjackpot, KeyCode.G);
-        m_myKeys.Add(GameKey.Minorjacpot, KeyCode.H);
-        m_myKeys.Add(GameKey.Minijacpot, KeyCode.J);
+        m_myKeys.Add(GameKey.BigBonus, KeyCode.F);
+        m_myKeys.Add(GameKey.None_1, KeyCode.G);
+        m_myKeys.Add(GameKey.None_2, KeyCode.H);
+        m_myKeys.Add(GameKey.None_3, KeyCode.J);
         m_myKeys.Add(GameKey.AddMoney, KeyCode.K);
         m_myKeys.Add(GameKey.ResetMoney, KeyCode.L);
         m_myKeys.Add(GameKey.TimeForSpecialBonus, KeyCode.Z);

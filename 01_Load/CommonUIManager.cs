@@ -65,14 +65,11 @@ public class CommonUIManager : MonoBehaviour
 
             if(m_currentMoneyToAnimate >= m_targetMoneyToAnimate)
             {
-                ApplyMyMoneyText();
+                m_currentMoneyToAnimate = m_targetMoneyToAnimate;
+                
                 m_isAnimatingMonetText = false;
             }
-            else
-            {
-                m_myMoneyDisplay.SetNumber(m_currentMoneyToAnimate);
-            }
-            
+            m_myMoneyDisplay.SetNumber(m_currentMoneyToAnimate);
         }
     }
 
