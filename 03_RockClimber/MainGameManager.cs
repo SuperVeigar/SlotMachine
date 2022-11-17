@@ -63,6 +63,7 @@ public class MainGameManager : MonoBehaviour
     const float m_delayTimeToBonusIntroWithMainWin = 2.5f;
     const float m_delayTimeToBonusIntroWithNothing = 0.15f;
     const float m_timeToShowBonusWin = 3f;
+    const float m_timeToShowFreeWin = 3f;
     const float m_timeAnimatingMegaWin = 14.5f;
     Coroutine m_mainStateCoroutine;
 
@@ -82,6 +83,10 @@ public class MainGameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (InputManager.Instance.CheckKeyDown(GameKey.None_1))
+        {
+            Debug.Log(m_mainGameState);
+        }
         if (MainGameManager.Instance.m_isPaused) return;
 
         switch (m_mainGameState)
@@ -129,6 +134,7 @@ public class MainGameManager : MonoBehaviour
                 OnBonusEndState();
                 break; 
             case MainGameState.CheckFree:
+                OnCheckFreeState();
                 break;
             case MainGameState.BigWheelIntro:
                 break;
@@ -566,7 +572,13 @@ public class MainGameManager : MonoBehaviour
 
         if (GameDataManager.Instance.m_freeSymbolCount == 3)
         {
-            
+            GameSoundManager.Instance.PlayBonusStartSiren();
+            m_reels.TurnFreeWinSymbolAnim(true); 
+            for (int i = 0; i < m_refFree.Length; i++)
+            {
+                GameEffectManager.Instance.TurnOnWinFrame(m_refFree);
+            }
+            m_mainStateCoroutine = StartCoroutine(MoveToCheckFree());
         }
         else if (GameDataManager.Instance.m_bonusSymbolCount >= 3)
         {
@@ -583,12 +595,22 @@ public class MainGameManager : MonoBehaviour
     }
     void OnShowScatterWinState()
     {
-        if (GameDataManager.Instance.m_freeSymbolCount == 3) m_mainStateCoroutine = StartCoroutine(MoveToTotalReward());
+        if (GameDataManager.Instance.m_freeSymbolCount == 3)
+        {
+
+        }
         else if (GameDataManager.Instance.m_bonusSymbolCount >= 3)
         {
                      
         }
         else m_mainStateCoroutine = StartCoroutine(MoveToTotalReward());
+    }
+    IEnumerator MoveToCheckFree()
+    {
+        yield return new WaitForSeconds(m_timeToShowFreeWin);
+
+        GameSoundManager.Instance.TurnMainBGM(false);
+        m_mainGameState = MainGameState.CheckFree;
     }
     IEnumerator MoveToCheckBonus()
     {
@@ -672,9 +694,13 @@ public class MainGameManager : MonoBehaviour
 
         m_mainGameState = MainGameState.TotalEnd;
     }
+    void OnCheckFreeState()
+    {
+        m_mainStateCoroutine = StartCoroutine(MoveToTotalReward());
+    }
     void OnTotalRewardState()
-    {               
-        
+    {
+        if (InputManager.Instance.CheckKeyDown(GameKey.Spin)) GameEffectManager.Instance.CollectMegaWin();
     }
     void OnTotalEndState()
     {

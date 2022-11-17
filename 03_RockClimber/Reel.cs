@@ -12,11 +12,12 @@ public class Reel : MonoBehaviour
 {
     public event Action<int> onSpinEnd;
 
+    public bool m_isReady { get; private set; }
     public int[] m_randomReel;
     public Symbol[] m_symbols = new Symbol[5];
     public AudioClip m_reelStopSound;
     public AudioClip m_winableReelSound;
-
+        
     bool m_isWinable;
     bool m_isForcedToStop;
     ReelState m_reelState;
@@ -38,9 +39,11 @@ public class Reel : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        m_isReady = false;
         m_damperAnimator = GetComponent<Animator>();
         m_audiosource = GetComponent<AudioSource>();
         InitValues();
+        m_isReady = true;
     }
 
     // Update is called once per frame
@@ -152,6 +155,13 @@ public class Reel : MonoBehaviour
         foreach (Symbol symbol in m_symbols)
         {
             symbol.SetBonusWinAnim(isOn);
+        }
+    }
+    public void TurnFreeWinSymbolAnim(bool isOn)
+    {
+        foreach (Symbol symbol in m_symbols)
+        {
+            symbol.SetFreeWinAnim(isOn);
         }
     }
     public void SetWinableReelAnim()

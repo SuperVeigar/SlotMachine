@@ -23,6 +23,7 @@ public class Symbol : MonoBehaviour
     public Image m_winFrame;
     public Image[] m_idleImageArray;
     public GameObject m_bonusWinAnim;
+    public GameObject m_freeWinAnim;
     public Animator m_winEffect;
 
     int m_row;
@@ -90,6 +91,13 @@ public class Symbol : MonoBehaviour
        if(m_symboleSort == SymbolSort.Bonus)
         {
             m_bonusWinAnim.SetActive(isOn);
+        }
+    }
+    public void SetFreeWinAnim(bool isOn)
+    {
+        if (m_symboleSort == SymbolSort.Free)
+        {
+            m_freeWinAnim.SetActive(isOn);
         }
     }
     public void CheckWinable(bool isForcedToStop)

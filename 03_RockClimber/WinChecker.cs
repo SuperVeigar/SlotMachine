@@ -32,7 +32,10 @@ public class WinChecker : MonoBehaviour
     int[,] m_payTable;
     Symbol[,] m_symbols;
 
-
+    private void Awake()
+    {
+        
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -51,7 +54,7 @@ public class WinChecker : MonoBehaviour
     {
         for (int i = 0; i < m_winLines.Length; i++) m_winLines[i].ResetValues();
     }
-    public void SetSymbols(Symbol[,] symbols)
+    public void SetSymbols(ref Symbol[,] symbols)
     {
         for (int row = 0; row < GameDataManager.Instance.GetSlotRow(); row++)
         {
@@ -117,11 +120,9 @@ public class WinChecker : MonoBehaviour
     {
         m_payTable = new int[GameDataManager.Instance.GetLine(), GameDataManager.Instance.GetSlotCol()];
         StreamReader reader = new StreamReader(Application.dataPath + "/Resources/paytable.csv");
-        
         string lineData;
-        string[] arrayData; 
-
-        for(int row = 0; row < GameDataManager.Instance.GetLine(); row++)
+        string[] arrayData;
+        for (int row = 0; row < GameDataManager.Instance.GetLine(); row++)
         {
             lineData = reader.ReadLine();
             arrayData = lineData.Split(',');
@@ -130,7 +131,6 @@ public class WinChecker : MonoBehaviour
                 m_payTable[row, col] = int.Parse(arrayData[col]);
             }            
         }
-
         reader.Close();
     }
     int FindWinRow(int payline, int col)

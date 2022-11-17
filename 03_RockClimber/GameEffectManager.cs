@@ -47,7 +47,7 @@ public class GameEffectManager : MonoBehaviour
     void Start()
     {
         m_winableFrame.SetActive(false);
-        m_megaWin.SetActive(false);       
+        m_megaWin.SetActive(false);
     }
 
     // Update is called once per frame

@@ -68,10 +68,13 @@ public class GameDataManager : MonoBehaviour
     Dictionary<BET, int> m_totalBetRefDic;
     SymbolWinValue[] m_symbolWinValues;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
         InitValues();
+    }
+    // Start is called before the first frame update
+    void Start()
+    {        
         GameDataInitEvent();
     }
 
