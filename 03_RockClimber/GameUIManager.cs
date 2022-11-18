@@ -24,12 +24,14 @@ public class GameUIManager : MonoBehaviour
     public Text m_totalWinNum;
     public Text m_winText;
     public Text m_winNum;
+    public Text m_freeCount;
     public Button m_startButton;
     public Button m_stopButton;
     public Button m_betUpButton;
     public Button m_betDownButton;
     public Image m_winBoxBG;
     public GameObject m_paytablePanel;
+    public GameObject m_freeTablo;
 
     static GameUIManager m_instance;
 
@@ -107,6 +109,14 @@ public class GameUIManager : MonoBehaviour
 
         m_totalWinNum.text = string.Format("{0:#,###}", GameDataManager.Instance.m_totalWin);
         m_winNum.text = string.Format("{0:#,###}", winNum);
+    }
+    public void TurnFreeTablo(bool isOn)
+    {
+        m_freeTablo.SetActive(isOn);       
+    }
+    public void SetFreeCountInTablo(int freeCount)
+    {
+        m_freeCount.text = freeCount.ToString();
     }
     #endregion Public Method
 

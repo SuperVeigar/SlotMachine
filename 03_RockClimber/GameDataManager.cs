@@ -48,8 +48,8 @@ public class GameDataManager : MonoBehaviour
     public int m_bonusWin;
     public int m_freeWin;    
     public int m_freeSymbolCount;
-    public int m_freeGameTotalCount;
-    public int m_freeGameCurrentCount;
+    public int m_freeGameTotalCount { get; private set; }
+    public int m_freeGameCurrentCount { get; private set; }
     public int m_bonusSymbolCount;
     public int m_bonusGameTotalCount;
     public int m_bonusGameCurrentCount;
@@ -172,6 +172,11 @@ public class GameDataManager : MonoBehaviour
     {
         m_bonusGameTotalCount = m_bonusSymbolCount;
         m_bonusGameCurrentCount = 0;
+    }
+    public void SetFreeGameCount(int freeCount)
+    {
+        m_freeGameTotalCount = freeCount;
+        m_freeGameCurrentCount = freeCount;
     }
     #endregion Public Method
 

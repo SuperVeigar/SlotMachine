@@ -18,8 +18,10 @@ public class GameSoundManager : MonoBehaviour
 
     public AudioClip m_winCoinSound;
     public AudioClip m_bonusStartSiren;
+    public AudioClip m_bigWheelintroSound;
     public GameObject m_mainBGM;
     public GameObject m_bonusBGM;
+    public GameObject m_bigWheelBGM;
 
     static GameSoundManager m_instance;
     AudioSource m_audioSource;
@@ -54,6 +56,15 @@ public class GameSoundManager : MonoBehaviour
     {
         if (on) m_bonusBGM.GetComponent<AudioSource>().Play();
         else m_bonusBGM.GetComponent<AudioSource>().Stop();
+    }
+    public void TurnBigWheelBGM(bool on)
+    {
+        if (on) m_bigWheelBGM.GetComponent<AudioSource>().Play();
+        else m_bigWheelBGM.GetComponent<AudioSource>().Stop();
+    }
+    public void PlayBigWheelIntro()
+    {
+        m_audioSource.PlayOneShot(m_bigWheelintroSound);
     }
     #endregion Public Method
 

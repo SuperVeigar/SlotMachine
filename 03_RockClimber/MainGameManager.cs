@@ -11,7 +11,7 @@ public enum MainGameState
     ShowScatterWin,
     CheckBonus, BonusIntro, BonusGame, BonusOutro, BonusEnd,    
     CheckFree, BigWheelIntro, BigWheelGame, BigWheelEnd,
-    FreeIntro, FreeReady, FreeSpin, FreeStop, FreeCheckWin, FreeReward, FreeTotalReward, FreeEnd,
+    FreeReady, FreeSpin, FreeStop, FreeCheckWin, FreeFiveOfKind, FreeReward, FreeTotalReward, FreeEnd,
     TotalReward, TotalEnd
 }
 
@@ -34,6 +34,8 @@ public class MainGameManager : MonoBehaviour
     public SymbolSort[,] m_pulledSymbols { get; private set; }
     public FiveOfKind m_fiveOfKind;
     public GameObject m_bonusGame;
+    public GameObject m_bigWheel;
+    public GameObject m_freeTablo;
 
     static MainGameManager m_instance;    
     bool m_isAutoSpin;
@@ -56,6 +58,9 @@ public class MainGameManager : MonoBehaviour
     const int m_probability_Hook = m_probability_Shoes + 14;
     const int m_probability_Tent = m_probability_Hook + 16;
     const int m_probability_Pick = m_probability_Tent + 16;
+    const int m_probability_20free = 10;
+    const int m_probability_15free = 30;
+    const int m_probability_10free = 60;
     int[] m_refBonus;
     int[] m_refFree;
     const float m_timeToActAutoSpin = 2f;
@@ -78,6 +83,8 @@ public class MainGameManager : MonoBehaviour
         m_fiveOfKind.onEndFiveOfKind += MoveToMainRewardFromFiveOfKind;
         BonusGameManager.Instance.onBonusGameEnd += MoveBonusOutroFromBonusGame;
         GameEffectManager.Instance.onCollectMegaWin += MoveToTotalRewardWithCollect;
+        m_bigWheel.GetComponent<BigWheel>().onFinishIntoAnim += MoveToBigWheelGameState;
+        m_bigWheel.GetComponent<BigWheel>().onStartFreeGame += MoveToBigWheelEndState;
     }
 
     // Update is called once per frame
@@ -137,26 +144,37 @@ public class MainGameManager : MonoBehaviour
                 OnCheckFreeState();
                 break;
             case MainGameState.BigWheelIntro:
+                OnBigWheelIntroState();
                 break;
             case MainGameState.BigWheelGame:
+                OnBigWheelGameState();
                 break;
             case MainGameState.BigWheelEnd:
-                break;
-            case MainGameState.FreeIntro:
+                OnBigWheelEndState();
                 break;
             case MainGameState.FreeReady:
+                OnFreeReadyState();
                 break;
             case MainGameState.FreeSpin:
+                OnFreeSpinState();
                 break;
             case MainGameState.FreeStop:
+                OnFreeStopState();
                 break;
             case MainGameState.FreeCheckWin:
+                OnFreeCheckWinState();
+                break;
+            case MainGameState.FreeFiveOfKind:
+                OnFreeFiveOfKindState();
                 break;
             case MainGameState.FreeReward:
+                OnFreeRewardState();
                 break;
             case MainGameState.FreeTotalReward:
+                OnFreeTotalRewardState();
                 break;
             case MainGameState.FreeEnd:
+                OnFreeEndState();
                 break;
             case MainGameState.TotalReward:
                 OnTotalRewardState();
@@ -616,7 +634,7 @@ public class MainGameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(m_timeToShowBonusWin);
 
-        GameSoundManager.Instance.TurnMainBGM(false);        
+        GameSoundManager.Instance.TurnMainBGM(false);
         m_mainGameState = MainGameState.CheckBonus;
     }
     void OnCheckBonusState()
@@ -695,6 +713,75 @@ public class MainGameManager : MonoBehaviour
         m_mainGameState = MainGameState.TotalEnd;
     }
     void OnCheckFreeState()
+    {
+        GameDataManager.Instance.SetFreeGameCount(GetFreeCount());
+        m_bigWheel.GetComponent<BigWheel>().CalculateGame(GameDataManager.Instance.m_freeGameTotalCount);
+        m_bigWheel.GetComponent<BigWheel>().StartIntro();
+        GameSoundManager.Instance.TurnBigWheelBGM(true);
+        GameSoundManager.Instance.PlayBigWheelIntro();
+        m_mainGameState = MainGameState.BigWheelIntro;        
+    }
+    int GetFreeCount()
+    {
+        int rand = Random.Range(0, 100);
+
+        if (rand < m_probability_20free) return 20;
+        else if (rand < m_probability_15free) return 15;
+        else return 10;
+    }
+    void OnBigWheelIntroState()
+    {
+        
+    }
+    void MoveToBigWheelGameState()
+    {
+        GameEffectManager.Instance.TurnOffWinFrame();
+        m_mainGameState = MainGameState.BigWheelGame;
+    }
+    void OnBigWheelGameState()
+    {
+
+    }
+    void MoveToBigWheelEndState()
+    {
+        m_bigWheel.SetActive(false);
+        GameUIManager.Instance.TurnFreeTablo(true);
+        GameUIManager.Instance.SetFreeCountInTablo(GameDataManager.Instance.m_freeGameCurrentCount);
+        m_mainGameState = MainGameState.BigWheelEnd;
+    }
+    void OnBigWheelEndState()
+    {
+        m_mainGameState = MainGameState.FreeReady;
+    }
+    void OnFreeReadyState()
+    {
+
+    }
+    void OnFreeSpinState()
+    {
+
+    }
+    void OnFreeStopState()
+    {
+
+    }
+    void OnFreeCheckWinState()
+    {
+
+    }
+    void OnFreeFiveOfKindState()
+    {
+
+    }
+    void OnFreeRewardState()
+    {
+
+    }
+    void OnFreeTotalRewardState()
+    {
+
+    }
+    void OnFreeEndState()
     {
         m_mainStateCoroutine = StartCoroutine(MoveToTotalReward());
     }
