@@ -747,6 +747,7 @@ public class MainGameManager : MonoBehaviour
         m_bigWheel.SetActive(false);
         GameUIManager.Instance.TurnFreeTablo(true);
         GameUIManager.Instance.SetFreeCountInTablo(GameDataManager.Instance.m_freeGameCurrentCount);
+        GameUIManager.Instance.SetFreeGameText();
         m_mainGameState = MainGameState.BigWheelEnd;
     }
     void OnBigWheelEndState()

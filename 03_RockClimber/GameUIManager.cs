@@ -20,6 +20,7 @@ public class GameUIManager : MonoBehaviour
 
     public Text m_totalBetNum;
     public Text m_goodLuckText;
+    public Text m_freegameText;
     public Text m_totalWinText;
     public Text m_totalWinNum;
     public Text m_winText;
@@ -89,6 +90,7 @@ public class GameUIManager : MonoBehaviour
     public void SetGoodLuckText()
     {
         m_goodLuckText.enabled = true;
+        m_freegameText.enabled = false;
         m_totalWinText.enabled = false;
         m_totalWinNum.enabled = false;
         m_winText.enabled = false;
@@ -99,6 +101,7 @@ public class GameUIManager : MonoBehaviour
     public void SetWinTextAndNum(int winNum)
     {
         m_goodLuckText.enabled = false;
+        m_freegameText.enabled = false;
         m_totalWinText.enabled = true;
         m_totalWinNum.enabled = true;
         m_winText.enabled = true;
@@ -109,6 +112,17 @@ public class GameUIManager : MonoBehaviour
 
         m_totalWinNum.text = string.Format("{0:#,###}", GameDataManager.Instance.m_totalWin);
         m_winNum.text = string.Format("{0:#,###}", winNum);
+    }
+    public void SetFreeGameText()
+    {
+        m_goodLuckText.enabled = false;
+        m_freegameText.enabled = true;
+        m_totalWinText.enabled = false;
+        m_totalWinNum.enabled = false;
+        m_winText.enabled = false;
+        m_winNum.enabled = false;
+
+        m_winBoxBG.GetComponent<Animator>().SetTrigger("Idle");
     }
     public void TurnFreeTablo(bool isOn)
     {
