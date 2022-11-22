@@ -37,7 +37,7 @@ public class BigWheel : MonoBehaviour
     const float m_maxDampingAngle = 10f;
     const float m_dampingSpeed = 3f;
     const float m_anglePerPiece = 45f;
-    const float m_marginAngle = 10f;
+    const float m_marginAngle = 4f;
     const float m_angleOnBreakState = 720f;
     const float m_angleFor20Frees = 135f;
     readonly float[] m_anglgeFor15Frees = new float[3] { 45f, 225f, 315f };
@@ -120,7 +120,7 @@ public class BigWheel : MonoBehaviour
         Debug.Log("-----------------------------------------");
         Debug.Log("Free Count  :  " + freeCount);
         Debug.Log("-----------------------------------------");
-        Debug.Log("m_targetAngle : " + m_targetAngle + " / " + (m_targetAngle % 360 + 360) + " /// m_breakAngle : " + m_breakAngle + " / " + (m_breakAngle % 360 + 360));
+        //Debug.Log("m_targetAngle : " + m_targetAngle + " / " + (m_targetAngle % 360 + 360) + " /// m_breakAngle : " + m_breakAngle + " / " + (m_breakAngle % 360 + 360));
 
         foreach (GameObject obj in m_freeCountInResult) obj.SetActive(false);
         if(freeCount ==20) m_freeCountInResult[0].SetActive(true);

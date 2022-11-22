@@ -11,8 +11,9 @@ public enum MainGameState
     ShowScatterWin,
     CheckBonus, BonusIntro, BonusGame, BonusOutro, BonusEnd,    
     CheckFree, BigWheelIntro, BigWheelGame, BigWheelEnd,
-    FreeReady, FreeSpin, FreeStop, FreeCheckWin, FreeFiveOfKind, FreeReward, FreeTotalReward, FreeEnd,
-    TotalReward, TotalEnd
+    FreeReady, FreeSpin, FreeStop, FreeCheckWin, FreeReward, FreeEnd, AutoSpinDelayOnFree, FreeTotalReward, FreeTotalEnd,
+    TotalReward, TotalEnd,
+    AutoSpinDelay
 }
 
 public class MainGameManager : MonoBehaviour
@@ -35,7 +36,6 @@ public class MainGameManager : MonoBehaviour
     public FiveOfKind m_fiveOfKind;
     public GameObject m_bonusGame;
     public GameObject m_bigWheel;
-    public GameObject m_freeTablo;
 
     static MainGameManager m_instance;    
     bool m_isAutoSpin;
@@ -50,26 +50,27 @@ public class MainGameManager : MonoBehaviour
     const int m_probability_5Bonus = m_probability_4Bonus + 2;
     const int m_probability_Main = m_probability_5Bonus + 33;
     const int m_probability_Wild = 5;
-    const int m_probability_BigFoot = m_probability_Wild + 5;
-    const int m_probability_Climber = m_probability_BigFoot + 8;
-    const int m_probability_Logo = m_probability_Climber + 10;
-    const int m_probability_Helmet = m_probability_Logo + 12;
-    const int m_probability_Shoes = m_probability_Helmet + 14;
-    const int m_probability_Hook = m_probability_Shoes + 14;
-    const int m_probability_Tent = m_probability_Hook + 16;
-    const int m_probability_Pick = m_probability_Tent + 16;
+    const int m_probability_BigFoot = 5;
+    const int m_probability_Climber = 8;
+    const int m_probability_Logo = 10;
+    const int m_probability_Helmet = 12;
+    const int m_probability_Shoes = 14;
+    const int m_probability_Hook = 14;
+    const int m_probability_Tent = 16;
+    const int m_probability_Pick = 16;
+    const int m_probabilityWeight = 2;
     const int m_probability_20free = 10;
     const int m_probability_15free = 30;
     const int m_probability_10free = 60;
     int[] m_refBonus;
     int[] m_refFree;
-    const float m_timeToActAutoSpin = 2f;
     const float m_timeToSwitchStopButton = 0.5f;
     const float m_delayTimeToBonusIntroWithMainWin = 2.5f;
     const float m_delayTimeToBonusIntroWithNothing = 0.15f;
     const float m_timeToShowBonusWin = 3f;
     const float m_timeToShowFreeWin = 3f;
     const float m_timeAnimatingMegaWin = 14.5f;
+    const float m_delayForAutoSpin = 1.5f;
     Coroutine m_mainStateCoroutine;
 
     void Start()
@@ -80,7 +81,8 @@ public class MainGameManager : MonoBehaviour
         ResetValues();
         CommonUIManager.Instance.m_menuDropdown.onOpenHelpPanel += PauseGame;
         CommonUIManager.Instance.m_menuDropdown.onCloseHelpPanel += ResumeGame;
-        m_fiveOfKind.onEndFiveOfKind += MoveToMainRewardFromFiveOfKind;
+        m_fiveOfKind.onEndFiveOfKindWithMain += MoveToMainRewardFromFiveOfKind;
+        m_fiveOfKind.onEndFiveOfKindWithFree += MoveToFreeRewardFromFiveOfKind;
         BonusGameManager.Instance.onBonusGameEnd += MoveBonusOutroFromBonusGame;
         GameEffectManager.Instance.onCollectMegaWin += MoveToTotalRewardWithCollect;
         m_bigWheel.GetComponent<BigWheel>().onFinishIntoAnim += MoveToBigWheelGameState;
@@ -90,16 +92,12 @@ public class MainGameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (InputManager.Instance.CheckKeyDown(GameKey.None_1))
-        {
-            Debug.Log(m_mainGameState);
-        }
         if (MainGameManager.Instance.m_isPaused) return;
 
         switch (m_mainGameState)
         {
-            case MainGameState.Ready:
-                CheckGameStartByTestKey();
+            case MainGameState.Ready:                
+                OnReadyState();
                 break;
             case MainGameState.Spin:
                 OnSpinState();
@@ -164,23 +162,29 @@ public class MainGameManager : MonoBehaviour
             case MainGameState.FreeCheckWin:
                 OnFreeCheckWinState();
                 break;
-            case MainGameState.FreeFiveOfKind:
-                OnFreeFiveOfKindState();
-                break;
             case MainGameState.FreeReward:
                 OnFreeRewardState();
+                break;            
+            case MainGameState.FreeEnd:
+                OnFreeEndState();
+                break;
+            case MainGameState.AutoSpinDelayOnFree:
+                OnAutoSpinDelayOnFreeState();
                 break;
             case MainGameState.FreeTotalReward:
                 OnFreeTotalRewardState();
                 break;
-            case MainGameState.FreeEnd:
-                OnFreeEndState();
+            case MainGameState.FreeTotalEnd:
+                OnFreeTotalEndState();
                 break;
             case MainGameState.TotalReward:
                 OnTotalRewardState();
                 break;
             case MainGameState.TotalEnd:
                 OnTotalEndState();
+                break;
+            case MainGameState.AutoSpinDelay:
+                OnAutoSpinDelayState();
                 break;
         }
     }
@@ -200,8 +204,8 @@ public class MainGameManager : MonoBehaviour
             ResetValues();
             GameDataManager.Instance.ResetValues();
                        
-            CalculateMainGame();
-            CalculateTotalGame();
+            CalculateReelGame();
+            CalculateScatter();
             StartCoroutine(SwitchSpinStopButton(false));
 
             m_reels.StartSpin(m_refBonus, m_refFree);
@@ -212,24 +216,64 @@ public class MainGameManager : MonoBehaviour
 #if UNITY_EDITOR
             ShowPulledSymbols();
 #endif
-        }       
+        } 
+        else if(m_mainGameState == MainGameState.FreeReady &&
+            GameDataManager.Instance.m_freeGameCurrentCount>0)
+        {
+            CommonUIManager.Instance.StopIncresingMoneyTextAnim();
+
+            GameDataManager.Instance.UseFreeGameCount();
+            GameUIManager.Instance.SetFreeCountInTablo(GameDataManager.Instance.m_freeGameCurrentCount);
+
+            ResetValues();
+            GameDataManager.Instance.ResetValuesInFree();
+
+            CalculateReelGame(m_probabilityWeight);
+            StartCoroutine(SwitchSpinStopButton(false));
+
+            m_reels.StartSpin();
+
+            //GameUIManager.Instance.StartFreeEffect();
+            //GameUIManager.Instance.SetFreeGameText();
+
+            m_mainGameState = MainGameState.FreeSpin;
+        }
+    }
+    public void SetAutoSpin()
+    {
+        m_isAutoSpin = true;
+        GameUIManager.Instance.TurnAutoSpinText(true);
     }
     public void StopReels()
     {
         if (MainGameManager.Instance.m_isPaused) return;
 
-        if (m_mainGameState == MainGameState.Spin)
+        if (m_mainGameState == MainGameState.Spin ||
+            m_mainGameState == MainGameState.FreeSpin)
         {
             m_reels.StopSpin();
         }
+
+        if(m_isAutoSpin)
+        {
+            m_isAutoSpin = false;
+            GameUIManager.Instance.TurnAutoSpinText(false);
+            GameUIManager.Instance.SetStartButtonOn(true);
+        }
+        
     }
     public bool IsOnReadyState()
     {
         return m_mainGameState == MainGameState.Ready;
     }
-    public void FinishMainSpin()
+    public bool IsOnReadyForMainOrFree()
     {
-        m_mainGameState = MainGameState.Stop;
+        return m_mainGameState == MainGameState.Ready || m_mainGameState == MainGameState.FreeReady;
+    }
+    public void FinishReelSpin()
+    {
+        if(m_mainGameState == MainGameState.Spin) m_mainGameState = MainGameState.Stop;
+        else if(m_mainGameState == MainGameState.FreeSpin) m_mainGameState = MainGameState.FreeStop;
     }
     #endregion Public Method
 
@@ -276,9 +320,19 @@ public class MainGameManager : MonoBehaviour
         m_isPaused = false;
         m_reels.ResumeGame();
     }
-    void CalculateMainGame()
+    void CalculateReelGame(int weight = 0)
     {
-        for(int i = 0; i < GameDataManager.Instance.GetSlotCol(); i++)
+        int probability_Wild = m_probability_Wild + weight;
+        int probability_BigFoot = m_probability_BigFoot + probability_Wild + weight;
+        int probability_Climber = m_probability_Climber + probability_BigFoot + weight;
+        int probability_Logo =  m_probability_Logo + probability_Climber + weight;
+        int probability_Helmet = m_probability_Helmet + probability_Logo ;
+        int probability_Shoes = m_probability_Shoes + probability_Helmet - weight;
+        int probability_Hook =  m_probability_Hook + probability_Shoes - weight;
+        int probability_Tent =  m_probability_Tent + probability_Hook - weight;
+        int probability_Pick =  m_probability_Pick + probability_Tent - weight;
+
+        for (int i = 0; i < GameDataManager.Instance.GetSlotCol(); i++)
         {
             for (int k = 0; k < GameDataManager.Instance.GetSlotRow(); k++)
             {
@@ -286,38 +340,38 @@ public class MainGameManager : MonoBehaviour
 
                 switch(thisWin)
                 {
-                    case int a when a < m_probability_Wild:
+                    case int a when a < probability_Wild:
                         m_pulledSymbols[k, i] = SymbolSort.Wild;
                         break;
-                    case int a when a < m_probability_BigFoot:
+                    case int a when a < probability_BigFoot:
                         m_pulledSymbols[k, i] = SymbolSort.Bigfoot;
                         break;
-                    case int a when a < m_probability_Climber:
+                    case int a when a < probability_Climber:
                         m_pulledSymbols[k, i] = SymbolSort.Climber;
                         break;
-                    case int a when a < m_probability_Logo:
+                    case int a when a < probability_Logo:
                         m_pulledSymbols[k, i] = SymbolSort.Logo;
                         break;
-                    case int a when a < m_probability_Helmet:
+                    case int a when a < probability_Helmet:
                         m_pulledSymbols[k, i] = SymbolSort.Helmet;
                         break;
-                    case int a when a < m_probability_Shoes:
+                    case int a when a < probability_Shoes:
                         m_pulledSymbols[k, i] = SymbolSort.Shoes;
                         break;
-                    case int a when a < m_probability_Hook:
+                    case int a when a < probability_Hook:
                         m_pulledSymbols[k, i] = SymbolSort.Hook;
                         break;
-                    case int a when a < m_probability_Tent:
+                    case int a when a < probability_Tent:
                         m_pulledSymbols[k, i] = SymbolSort.Tent;
                         break;
-                    case int a when a < m_probability_Pick:
+                    case int a when a < probability_Pick:
                         m_pulledSymbols[k, i] = SymbolSort.Pick;
                         break;
                 }
             }
-        }
+        }        
     }
-    void CalculateTotalGame()
+    void CalculateScatter()
     {
         int thisWin = Random.Range(0, 100);
 
@@ -482,6 +536,18 @@ public class MainGameManager : MonoBehaviour
 
         GameUIManager.Instance.SetStartButtonOn(isSpinButonOn);
     }
+    void OnReadyState()
+    {
+        if (InputManager.Instance.CheckKeyDown(GameKey.Spin) ||
+            m_isAutoSpin)
+        {
+            StartGame();
+        }
+
+        #region Test
+        CheckGameStartByTestKey();
+        #endregion Test
+    }
     void OnSpinState()
     {
         if (InputManager.Instance.CheckKeyDown(GameKey.Spin))
@@ -491,13 +557,14 @@ public class MainGameManager : MonoBehaviour
     }
     void OnStopState()
     {
-        GameUIManager.Instance.SetStartButtonOn(true);
+        if(!m_isAutoSpin) GameUIManager.Instance.SetStartButtonOn(true);
         m_mainGameState = MainGameState.CheckWin;        
     }
     void OnCheckWinState()
     {
-        m_reels.CheckWin();
-        m_mainGameState = MainGameState.CheckMain; 
+        m_reels.CheckWin(true);
+        GameDataManager.Instance.CheckMegaWin();
+        m_mainGameState = MainGameState.CheckMain;
     }
     void OnCheckMainState()
     {
@@ -507,7 +574,7 @@ public class MainGameManager : MonoBehaviour
 
             if (GameDataManager.Instance.m_isFiveOfKinds)
             {
-                m_fiveOfKind.StartAnim();
+                m_fiveOfKind.StartAnim(true);
                 m_mainGameState = MainGameState.FiveOfKinds;
             }
             else
@@ -532,21 +599,19 @@ public class MainGameManager : MonoBehaviour
         {
             if (IsBonusOrFreeOnNext() || !GameDataManager.Instance.m_isMegaWin) GameSoundManager.Instance?.PlayWinCoinSound();
         }
-            
-        
         m_mainGameState = MainGameState.MainEnd;
+        Debug.Log(GameDataManager.Instance.m_mainWin + "  /  " + GameDataManager.Instance.m_totalWin);
     }
     void ApplyWin(int win)
     {
         if (win <= 0) return;
+        
+        // 애니메이션 시작
+        CommonUIManager.Instance.AnimateIncreasingMyMoneyText(PlayerDataManager.Instance.m_playerData.m_myCurrentMoney, PlayerDataManager.Instance.m_playerData.m_myCurrentMoney + win);
 
         // 당첨금 데이터 적용
         GameUIManager.Instance.SetWinTextAndNum(win);
         PlayerDataManager.Instance.AddPlayerCurrentMoney(win);
-
-        // 애니메이션 시작
-        CommonUIManager.Instance.AnimateIncreasingMyMoneyText(PlayerDataManager.Instance.m_playerData.m_myCurrentMoney, PlayerDataManager.Instance.m_playerData.m_myCurrentMoney + win);
-
     }
     void OnMainEndState()
     {
@@ -691,7 +756,8 @@ public class MainGameManager : MonoBehaviour
     {
         m_mainGameState = MainGameState.TotalReward;
 
-        if (GameDataManager.Instance.m_isMegaWin)
+        if (GameDataManager.Instance.m_isMegaWin ||
+            GameDataManager.Instance.m_freeTotalWin > 0)
         {
             GameSoundManager.Instance.TurnMainBGM(false);
             GameEffectManager.Instance.TurnOnMegaWin(GameDataManager.Instance.m_totalWin);
@@ -744,10 +810,11 @@ public class MainGameManager : MonoBehaviour
     }
     void MoveToBigWheelEndState()
     {
+        m_reels.TurnFreeWinSymbolAnim(false);
         m_bigWheel.SetActive(false);
         GameUIManager.Instance.TurnFreeTablo(true);
         GameUIManager.Instance.SetFreeCountInTablo(GameDataManager.Instance.m_freeGameCurrentCount);
-        GameUIManager.Instance.SetFreeGameText();
+        //GameUIManager.Instance.SetFreeGameText();
         m_mainGameState = MainGameState.BigWheelEnd;
     }
     void OnBigWheelEndState()
@@ -756,47 +823,120 @@ public class MainGameManager : MonoBehaviour
     }
     void OnFreeReadyState()
     {
-
+        if (InputManager.Instance.CheckKeyDown(GameKey.Spin) ||
+            m_isAutoSpin)
+        {
+            StartGame();
+        }
     }
     void OnFreeSpinState()
     {
-
+        if (InputManager.Instance.CheckKeyDown(GameKey.Spin))
+        {
+            StopReels();
+        }
     }
     void OnFreeStopState()
     {
-
+        if (!m_isAutoSpin) GameUIManager.Instance.SetStartButtonOn(true);
+        m_mainGameState = MainGameState.FreeCheckWin;
     }
     void OnFreeCheckWinState()
     {
+        m_reels.CheckWin(false);
 
+        if (GameDataManager.Instance.m_freeWin > 0)
+        {
+            m_reels.TurnWinSymbolAnim(true);
+
+            if (GameDataManager.Instance.m_isFiveOfKinds)
+            {
+                m_fiveOfKind.StartAnim(false);
+                m_mainGameState = MainGameState.FiveOfKinds;
+            }
+            else
+            {
+                m_mainGameState = MainGameState.FreeReward;
+            }
+        }
+        else m_mainGameState = MainGameState.FreeEnd;
     }
-    void OnFreeFiveOfKindState()
+    void MoveToFreeRewardFromFiveOfKind()
     {
-
+        m_mainGameState = MainGameState.FreeReward;
     }
     void OnFreeRewardState()
+    {
+        ApplyWin(GameDataManager.Instance.m_freeWin);
+        if (GameDataManager.Instance.m_freeWin > 0) GameSoundManager.Instance?.PlayWinCoinSound();
+        m_mainGameState = MainGameState.FreeEnd;
+    }    
+    void OnFreeEndState()
+    {
+        if (GameDataManager.Instance.m_freeWin > 0)
+        {
+            StartCoroutine(MoveToAutoSpinDelayOnFreeState());
+        }
+        else
+        {
+            MoveNextStateFromFreeEnd();
+        }            
+    }
+    IEnumerator MoveToAutoSpinDelayOnFreeState()
+    {
+        m_mainGameState = MainGameState.AutoSpinDelayOnFree;
+        yield return new WaitForSeconds(m_delayForAutoSpin);
+        MoveNextStateFromFreeEnd();
+    }
+    void MoveNextStateFromFreeEnd()
+    {
+        if (GameDataManager.Instance.m_freeGameCurrentCount > 0)
+        {
+            m_mainGameState = MainGameState.FreeReady;
+        }
+        else
+        {
+            GameDataManager.Instance.CheckMegaWin();
+            m_mainGameState = MainGameState.FreeTotalReward;
+        }
+    }
+    void OnAutoSpinDelayOnFreeState()
     {
 
     }
     void OnFreeTotalRewardState()
     {
-
+        m_mainGameState = MainGameState.FreeTotalEnd;
     }
-    void OnFreeEndState()
+    void OnFreeTotalEndState()
     {
+        GameSoundManager.Instance.TurnBigWheelBGM(false);
+        GameUIManager.Instance.TurnFreeTablo(false);
         m_mainStateCoroutine = StartCoroutine(MoveToTotalReward());
     }
     void OnTotalRewardState()
     {
-        if (InputManager.Instance.CheckKeyDown(GameKey.Spin)) GameEffectManager.Instance.CollectMegaWin();
+        
     }
     void OnTotalEndState()
     {
-        if (GameDataManager.Instance.m_totalWin > 0)
+        if (GameDataManager.Instance.m_totalWin > 0 )
         {
             GameDataManager.Instance.UpdateMaxBet();
         }
+        if (m_isAutoSpin &&
+            GameDataManager.Instance.m_totalWin > 0) StartCoroutine(MoveToAutoSpinDelayState());
+        else m_mainGameState = MainGameState.Ready;
+    }
+    IEnumerator MoveToAutoSpinDelayState()
+    {
+        m_mainGameState = MainGameState.AutoSpinDelay;
+        yield return new WaitForSeconds(m_delayForAutoSpin);
         m_mainGameState = MainGameState.Ready;
+    }
+    void OnAutoSpinDelayState()
+    {
+        
     }
     #endregion Private Method
 
@@ -839,7 +979,7 @@ public class MainGameManager : MonoBehaviour
         {
             ResetValues();
             GameDataManager.Instance.ResetValues();
-            CalculateMainGame();
+            CalculateReelGame();
             SetFiveOfKind();
             StartGameByTestKey();
         }
@@ -847,7 +987,7 @@ public class MainGameManager : MonoBehaviour
         {
             ResetValues();
             GameDataManager.Instance.ResetValues();
-            CalculateMainGame();
+            CalculateReelGame();
             GameDataManager.Instance.m_freeSymbolCount = 1;
             SetFreeScatter(GameDataManager.Instance.m_freeSymbolCount);
             StartGameByTestKey();
@@ -856,7 +996,7 @@ public class MainGameManager : MonoBehaviour
         {
             ResetValues();
             GameDataManager.Instance.ResetValues();
-            CalculateMainGame();
+            CalculateReelGame();
             GameDataManager.Instance.m_freeSymbolCount = 2;
             SetFreeScatter(GameDataManager.Instance.m_freeSymbolCount);
             StartGameByTestKey();
@@ -865,7 +1005,7 @@ public class MainGameManager : MonoBehaviour
         {
             ResetValues();
             GameDataManager.Instance.ResetValues();
-            CalculateMainGame();
+            CalculateReelGame();
             GameDataManager.Instance.m_freeSymbolCount = 3;
             SetFreeScatter(GameDataManager.Instance.m_freeSymbolCount);
             StartGameByTestKey();
@@ -874,7 +1014,7 @@ public class MainGameManager : MonoBehaviour
         {
             ResetValues();
             GameDataManager.Instance.ResetValues();
-            CalculateMainGame();
+            CalculateReelGame();
             GameDataManager.Instance.m_bonusSymbolCount = 1;
             SetBonusScatter(GameDataManager.Instance.m_bonusSymbolCount);
             StartGameByTestKey();
@@ -883,7 +1023,7 @@ public class MainGameManager : MonoBehaviour
         {
             ResetValues();
             GameDataManager.Instance.ResetValues();
-            CalculateMainGame();
+            CalculateReelGame();
             GameDataManager.Instance.m_bonusSymbolCount = 2;
             SetBonusScatter(GameDataManager.Instance.m_bonusSymbolCount);
             StartGameByTestKey();
@@ -892,7 +1032,7 @@ public class MainGameManager : MonoBehaviour
         {
             ResetValues();
             GameDataManager.Instance.ResetValues();
-            CalculateMainGame();
+            CalculateReelGame();
             GameDataManager.Instance.m_bonusSymbolCount = 3;
             SetBonusScatter(GameDataManager.Instance.m_bonusSymbolCount);
             StartGameByTestKey();
@@ -901,7 +1041,7 @@ public class MainGameManager : MonoBehaviour
         {
             ResetValues();
             GameDataManager.Instance.ResetValues();
-            CalculateMainGame();
+            CalculateReelGame();
             GameDataManager.Instance.m_bonusSymbolCount = 4;
             SetBonusScatter(GameDataManager.Instance.m_bonusSymbolCount);
             StartGameByTestKey();
@@ -910,14 +1050,10 @@ public class MainGameManager : MonoBehaviour
         {
             ResetValues();
             GameDataManager.Instance.ResetValues();
-            CalculateMainGame();
+            CalculateReelGame();
             GameDataManager.Instance.m_bonusSymbolCount = 5;
             SetBonusScatter(GameDataManager.Instance.m_bonusSymbolCount);
             StartGameByTestKey();
-        }
-        else if(InputManager.Instance.CheckKeyDown(GameKey.Spin))
-        {
-            StartGame();
         }
     }
     void StartGameByTestKey()

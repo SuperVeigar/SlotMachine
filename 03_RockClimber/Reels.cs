@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 
 public class Reels : MonoBehaviour
@@ -9,6 +10,7 @@ public class Reels : MonoBehaviour
     public AudioClip m_slotStartSound;
 
     const float m_reelSpinTime = 2f;
+    const float m_reelSpinTimeInFree = 1.2f;
     const float m_reelStopInterval = 0.3f;
     const float m_winableScatterTime = 1.6f;
     AudioSource m_audiosource;
@@ -33,9 +35,23 @@ public class Reels : MonoBehaviour
     }
 
     #region Public Method
+    // 이 함수는 Free Game에서 사용합니다. Main Game에서는 StartSpin(int[] refBonus, int[] refFree)를 사용하세요.
+    public void StartSpin()
+    {
+        m_winChecker.ResetValues();
+        TurnWinSymbolAnim(false);
+        m_audiosource.PlayOneShot(m_slotStartSound);
+
+        for (int i = 0; i < m_reels.Length; i++)
+        {
+            m_reels[i].StartSpin(m_reelSpinTimeInFree + m_reelStopInterval * i, false);
+        }
+    }
+    // 이 함수는 Main Game에서 사용합니다. Free Game에서는 StartSpin()를 사용하세요.
     public void StartSpin(int[] refBonus, int[] refFree)
     {
         Debug.Log("refBonus : " + refBonus[0] + refBonus[1] + refBonus[2] + refBonus[3] + refBonus[4] + "  refFree  : " + refFree[0] + refFree[1] + refFree[2] + refFree[3] + refFree[4]);
+
         m_winChecker.ResetValues();
         TurnWinSymbolAnim(false);
         m_audiosource.PlayOneShot(m_slotStartSound);
@@ -84,9 +100,9 @@ public class Reels : MonoBehaviour
             m_reels[i].StopSpin();
         }
     }
-    public void CheckWin()
+    public void CheckWin(bool isMain)
     {
-        m_winChecker?.CheckWin();
+        m_winChecker?.CheckWin(isMain);
     }
     public void TurnWinSymbolAnim(bool isOn)
     {
@@ -144,7 +160,7 @@ public class Reels : MonoBehaviour
     }
     void InformFinToMain(int dummy)
     {
-        MainGameManager.Instance.FinishMainSpin();
+        MainGameManager.Instance.FinishReelSpin();
     }
     void SetWinableReelAnim(int currentCol)
     {

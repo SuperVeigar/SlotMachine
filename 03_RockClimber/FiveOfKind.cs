@@ -6,12 +6,14 @@ using System;
 
 public class FiveOfKind : MonoBehaviour
 {
-    public event Action onEndFiveOfKind;
+    public event Action onEndFiveOfKindWithMain;
+    public event Action onEndFiveOfKindWithFree;
     public Image m_blackBG;
     public Image m_fiveImage;
     public Image m_ofImage;
     public Image m_kindImage;
 
+    bool m_isMain;
     const float m_animTime = 1.5f;
     AudioSource m_audioSource;
 
@@ -30,8 +32,9 @@ public class FiveOfKind : MonoBehaviour
     }
 
     #region Public Method
-    public void StartAnim()
+    public void StartAnim(bool isMain)
     {
+        m_isMain = isMain;
         SetAnim(true);
         m_audioSource.Play();
         StartCoroutine(FinishAnim());
@@ -52,7 +55,8 @@ public class FiveOfKind : MonoBehaviour
         yield return new WaitForSeconds(m_animTime);
 
         SetAnim(false);
-        onEndFiveOfKind();
+        if(m_isMain) onEndFiveOfKindWithMain();
+        else onEndFiveOfKindWithFree();
     }
     #endregion Private Method
 }

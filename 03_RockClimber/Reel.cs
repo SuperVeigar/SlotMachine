@@ -24,7 +24,7 @@ public class Reel : MonoBehaviour
     int m_col;
     int m_randomReelNum;
     int m_switchCount;
-    const float m_acceleration = 5000f;
+    const float m_acceleration = 7000f;
     const float m_deceleration = -7000f;
     float m_currentMoveSpeed;
     const float m_maxMoveSpeed= 5000f;
@@ -134,7 +134,7 @@ public class Reel : MonoBehaviour
     }
     public void StopSpin()
     {
-        if(m_reelState == ReelState.Spin)
+        if(m_reelState == ReelState.Spin )
         {
             m_isForcedToStop = true;
             StopCoroutine(m_spinStopCoroutine);

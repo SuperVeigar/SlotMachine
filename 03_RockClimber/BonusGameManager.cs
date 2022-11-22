@@ -221,6 +221,7 @@ public class BonusGameManager : MonoBehaviour
     }
     IEnumerator MoveToEndFromTotalAward()
     {
+        GameDataManager.Instance.CheckMegaWin();
         GameSoundManager.Instance.TurnBonusBGM(false);
         m_resultPanel.SetActive(true);        
         StartCoroutine(UpdateResultNum());

@@ -33,8 +33,11 @@ public class GameUIManager : MonoBehaviour
     public Image m_winBoxBG;
     public GameObject m_paytablePanel;
     public GameObject m_freeTablo;
+    public GameObject m_freeStartEffect;
+    public GameObject m_autoSpinText;
 
     static GameUIManager m_instance;
+    Coroutine m_freeStarEffecttCoroutine;
 
     private void Awake()
     {
@@ -132,6 +135,14 @@ public class GameUIManager : MonoBehaviour
     {
         m_freeCount.text = freeCount.ToString();
     }
+    public void StartFreeEffect()
+    {
+        if(m_freeStarEffecttCoroutine == null) m_freeStarEffecttCoroutine = StartCoroutine(TurnOnOffFreeStartEffect());
+    }
+    public void TurnAutoSpinText(bool isOn)
+    {
+        m_autoSpinText.SetActive(isOn);
+    }
     #endregion Public Method
 
     #region Private Method
@@ -155,6 +166,12 @@ public class GameUIManager : MonoBehaviour
         m_stopButton.interactable = active;
         m_betUpButton.interactable = active;
         m_betDownButton.interactable = active;
+    }
+    IEnumerator TurnOnOffFreeStartEffect()
+    {
+        m_freeStartEffect.SetActive(true);
+        yield return new WaitForSeconds(2f);
+        m_freeStartEffect.SetActive(false);
     }
     #endregion Private Method
 }

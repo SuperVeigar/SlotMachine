@@ -47,6 +47,7 @@ public class PlayerDataManager : MonoBehaviour
     void Start()
     {
         m_filePath = Path.Combine(Application.dataPath, "Resources/", "PlayerData.json");
+
         m_playerData = new PlayerData();    
         LoadPlayerData();
         SavePlayerData();

@@ -46,7 +46,8 @@ public class GameDataManager : MonoBehaviour
     public int m_totalWin;
     public int m_mainWin;
     public int m_bonusWin;
-    public int m_freeWin;    
+    public int m_freeWin;
+    public int m_freeTotalWin;
     public int m_freeSymbolCount;
     public int m_freeGameTotalCount { get; private set; }
     public int m_freeGameCurrentCount { get; private set; }
@@ -93,10 +94,21 @@ public class GameDataManager : MonoBehaviour
         m_mainWin = 0;
         m_bonusWin = 0;
         m_freeWin = 0;
+        m_freeTotalWin = 0;
         //m_myDisplayMoney = PlayerDataManager.Instance.m_playerData.m_myCurrentMoney;
         m_freeSymbolCount = 0;
         m_freeGameTotalCount = 0;
         m_freeGameCurrentCount = 0;
+        m_bonusSymbolCount = 0;
+        m_bonusGameTotalCount = 0;
+        m_bonusGameCurrentCount = 0;
+    }
+    public void ResetValuesInFree()
+    {
+        m_isFiveOfKinds = false;
+        m_isMegaWin = false;
+        m_freeWin = 0;
+        m_freeSymbolCount = 0;
         m_bonusSymbolCount = 0;
         m_bonusGameTotalCount = 0;
         m_bonusGameCurrentCount = 0;
@@ -147,14 +159,19 @@ public class GameDataManager : MonoBehaviour
         int win = winValue * m_totalBet;
         m_mainWin += win;
         m_totalWin += win;
-        CheckMegaWin();
+    }
+    public void AddFreeWin(int winValue)
+    {
+        int win = winValue * m_totalBet;
+        m_freeWin += win;
+        m_freeTotalWin += win;
+        m_totalWin += win;
     }
     public int AddBonusWin(int winValue)
     {
         int win = winValue * m_totalBetRefDic[m_bet];
         m_bonusWin += win;
         m_totalWin += win;
-        CheckMegaWin();
 
         return win;
     }
@@ -177,6 +194,15 @@ public class GameDataManager : MonoBehaviour
     {
         m_freeGameTotalCount = freeCount;
         m_freeGameCurrentCount = freeCount;
+    }
+    public void UseFreeGameCount()
+    {
+        m_freeGameCurrentCount--;
+    }
+    public void CheckMegaWin()
+    {
+        Debug.Log("mega win ? " + m_totalWin / m_totalBetRefDic[m_bet]);
+        if (m_totalWin >= m_totalBetRefDic[m_bet] * m_megawinFactor) m_isMegaWin = true;
     }
     #endregion Public Method
 
@@ -244,11 +270,6 @@ public class GameDataManager : MonoBehaviour
     void CalcTotalBet()
     {
         m_totalBet = m_totalBetRefDic[m_bet] * m_lines;
-    }
-    void CheckMegaWin()
-    {
-        Debug.Log("mega win ? " + m_totalWin / m_totalBetRefDic[m_bet]);
-        if (m_totalWin >= m_totalBetRefDic[m_bet] * m_megawinFactor) m_isMegaWin = true;
-    }
+    }    
     #endregion Private Method
 }

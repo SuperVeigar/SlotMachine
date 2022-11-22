@@ -64,7 +64,7 @@ public class WinChecker : MonoBehaviour
             }
         }
     }
-    public void CheckWin()
+    public void CheckWin(bool isMain)
     {
         SymbolSort firstSymbol;
         int winCount;
@@ -94,7 +94,8 @@ public class WinChecker : MonoBehaviour
             if(m_winLines[payline].m_winValue > 0)
             {
                 Debug.Log((payline+1) + " : " + m_winLines[payline].m_winCount);
-                GameDataManager.Instance.AddMainWin(m_winLines[payline].m_winValue);
+                if(isMain) GameDataManager.Instance.AddMainWin(m_winLines[payline].m_winValue);
+                else GameDataManager.Instance.AddFreeWin(m_winLines[payline].m_winValue);
 
                 for (int col = 0; col < m_winLines[payline].m_winCount; col++)
                 {
