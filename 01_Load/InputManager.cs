@@ -5,7 +5,7 @@ using UnityEngine;
 public enum GameKey
 {
     BetUp = 0, BetDown, Spin, Escape,
-    AllWilds, FiveOfKind, Free1, Free2, Free3, Bonus1, Bonus2, Bonus3, Bonus4, Bonus5,
+    NoScatter, FiveOfKind, Free1, Free2, Free3, Bonus1, Bonus2, Bonus3, Bonus4, Bonus5,
     Free20, Free15, Free10,
     BigBonus, None_1, None_2, None_3,
     AddMoney, ResetMoney,
@@ -65,7 +65,7 @@ public class InputManager : MonoBehaviour
         m_myKeys.Add(GameKey.BetDown, KeyCode.DownArrow);
         m_myKeys.Add(GameKey.Spin, KeyCode.Space);
         m_myKeys.Add(GameKey.Escape, KeyCode.Escape);
-        m_myKeys.Add(GameKey.AllWilds, KeyCode.Q);
+        m_myKeys.Add(GameKey.NoScatter, KeyCode.Q);
         m_myKeys.Add(GameKey.FiveOfKind, KeyCode.W);
         m_myKeys.Add(GameKey.Free1, KeyCode.E);
         m_myKeys.Add(GameKey.Free2, KeyCode.R);

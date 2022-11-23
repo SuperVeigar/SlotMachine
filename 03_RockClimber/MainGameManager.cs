@@ -435,6 +435,8 @@ public class MainGameManager : MonoBehaviour
                 if (col1 != col2) break;
             }
 
+            m_pulledSymbols[0, 1] = SymbolSort.Wild;
+            m_pulledSymbols[0, 2] = SymbolSort.Wild;
             m_pulledSymbols[row1, col1] = SymbolSort.Free;
             m_pulledSymbols[row2, col2] = SymbolSort.Free;
             m_refFree[col1] = 1;
@@ -480,7 +482,8 @@ public class MainGameManager : MonoBehaviour
 
                 if (col1 != col2) break;
             }
-
+            m_pulledSymbols[2, 1] = SymbolSort.Wild;
+            m_pulledSymbols[2, 2] = SymbolSort.Wild;
             m_pulledSymbols[row1, col1] = SymbolSort.Bonus;
             m_pulledSymbols[row2, col2] = SymbolSort.Bonus;
             m_refBonus[col1] = 1;
@@ -962,17 +965,11 @@ public class MainGameManager : MonoBehaviour
         if (MainGameManager.Instance.m_isPaused) return;
 
 
-        if (InputManager.Instance.CheckKeyDown(GameKey.AllWilds))
+        if (InputManager.Instance.CheckKeyDown(GameKey.NoScatter))
         {
             ResetValues();
             GameDataManager.Instance.ResetValues();
-            for (int i = 0; i < GameDataManager.Instance.GetSlotCol(); i++)
-            {
-                for (int k = 0; k < GameDataManager.Instance.GetSlotRow(); k++)
-                {
-                    m_pulledSymbols[k, i] = SymbolSort.Wild;
-                }
-            }
+            CalculateReelGame();
             StartGameByTestKey();
         }
         else if (InputManager.Instance.CheckKeyDown(GameKey.FiveOfKind))
@@ -1071,7 +1068,7 @@ public class MainGameManager : MonoBehaviour
     }
     void SetFiveOfKind()
     {
-        for(int col = 0; col < GameDataManager.Instance.GetSlotCol()- 1; col++)
+        for(int col = 0; col < GameDataManager.Instance.GetSlotCol(); col++)
         {
             m_pulledSymbols[1, col] = SymbolSort.Wild;
         }        
